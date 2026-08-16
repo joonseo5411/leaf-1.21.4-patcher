@@ -1,0 +1,180 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 13:47:16 +0900
+Subject: [PATCH] Optimize map lookups with isEmpty check
+
+Replace ImmutableList#isEmpty() calls on the passengers list with a
+reference-equality check against a shared EMPTY_PASSENGERS singleton
+(Guava's ImmutableList.of() always returns the same cached instance
+for the empty case, so this is a safe, faster substitute). Also skip
+map/set contains() calls for activeEffects and collidableExemptions
+when they're empty.
+
+Backported from Leaf ver/26.2 (original author: OverwriteMC) to
+ver/1.21.4. AbstractMinecart.java lives directly under
+world/entity/vehicle/ in this version (not vehicle/minecart/).
+
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index df23d80d6b18e900414aa02e5c1812f0a10f0fb7..dabd9ebe9ad0b0f57e01b045321cd12b0fb671c2 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -217,6 +217,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     private int id = ENTITY_COUNTER.incrementAndGet();
+     public boolean blocksBuilding;
+     public ImmutableList<Entity> passengers = ImmutableList.of();
++    public static final ImmutableList<Entity> EMPTY_PASSENGERS = ImmutableList.of(); // Leaf - Optimize map lookups with isEmpty check
+     protected int boardingCooldown;
+     @Nullable
+     private Entity vehicle;
+@@ -455,7 +456,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+ 
+     @Override
+     public final boolean moonrise$hasAnyPlayerPassengers() {
+-        if (this.passengers.isEmpty()) {
++        if (this.passengers == EMPTY_PASSENGERS) { // Leaf - Optimize map lookups with isEmpty check
+             return false;
+         }
+         return this.getIndirectPassengersStream().anyMatch((entity) -> entity instanceof Player);
+@@ -3211,7 +3212,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         if (passenger.getVehicle() != this) {
+             throw new IllegalStateException("Use x.startRiding(y), not y.addPassenger(x)");
+         } else {
+-            if (this.passengers.isEmpty()) {
++            if (this.passengers == EMPTY_PASSENGERS) { // Leaf - Optimize map lookups with isEmpty check
+                 this.passengers = ImmutableList.of(passenger);
+             } else {
+                 List<Entity> list = Lists.newArrayList(this.passengers);
+@@ -3293,7 +3294,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     }
+ 
+     protected boolean canAddPassenger(Entity passenger) {
+-        return this.passengers.isEmpty();
++        return this.passengers == EMPTY_PASSENGERS; // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     protected boolean couldAcceptPassenger() {
+@@ -3453,7 +3454,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     }
+ 
+     public boolean isVehicle() {
+-        return !this.passengers.isEmpty();
++        return this.passengers != EMPTY_PASSENGERS; // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     public boolean dismountsUnderwater() {
+@@ -4440,11 +4441,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+ 
+     @Nullable
+     public Entity getFirstPassenger() {
+-        return this.passengers.isEmpty() ? null : this.passengers.get(0);
++        return this.passengers == EMPTY_PASSENGERS ? null : this.passengers.get(0); // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     public boolean hasPassenger(Entity entity) {
+-        return this.passengers.contains(entity);
++        return passengers != EMPTY_PASSENGERS && this.passengers.contains(entity); // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     public boolean hasPassenger(Predicate<Entity> predicate) {
+@@ -4458,19 +4459,19 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     }
+ 
+     private Stream<Entity> getIndirectPassengersStream() {
+-        if (this.passengers.isEmpty()) { return Stream.of(); } // Paper - Optimize indirect passenger iteration
++        if (this.passengers == EMPTY_PASSENGERS) { return Stream.of(); } // Paper - Optimize indirect passenger iteration // Leaf - Optimize map lookups with isEmpty check
+         return this.passengers.stream().flatMap(Entity::getSelfAndPassengers);
+     }
+ 
+     @Override
+     public Stream<Entity> getSelfAndPassengers() {
+-        if (this.passengers.isEmpty()) { return Stream.of(this); } // Paper - Optimize indirect passenger iteration
++        if (this.passengers == EMPTY_PASSENGERS) { return Stream.of(this); } // Paper - Optimize indirect passenger iteration // Leaf - Optimize map lookups with isEmpty check
+         return Stream.concat(Stream.of(this), this.getIndirectPassengersStream());
+     }
+ 
+     @Override
+     public Stream<Entity> getPassengersAndSelf() {
+-        if (this.passengers.isEmpty()) { return Stream.of(this); } // Paper - Optimize indirect passenger iteration
++        if (this.passengers == EMPTY_PASSENGERS) { return Stream.of(this); } // Paper - Optimize indirect passenger iteration // Leaf - Optimize map lookups with isEmpty check
+         return Stream.concat(this.passengers.stream().flatMap(Entity::getPassengersAndSelf), Stream.of(this));
+     }
+ 
+@@ -4478,7 +4479,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         // Paper start - optimise entity tracker
+         final List<Entity> ret = new ArrayList<>();
+ 
+-        if (this.passengers.isEmpty()) {
++        if (this.passengers == EMPTY_PASSENGERS) {
+             return ret;
+         }
+ 
+@@ -4493,7 +4494,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     }
+ 
+     public boolean hasExactlyOnePlayerPassenger() {
+-        if (this.passengers.isEmpty()) { return false; } // Paper - Optimize indirect passenger iteration
++        if (this.passengers == EMPTY_PASSENGERS) { return false; } // Paper - Optimize indirect passenger iteration // Leaf - Optimize map lookups with isEmpty check
+         return this.countPlayerPassengers() == 1;
+     }
+ 
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index 3aedae4c11bd33502e3ac2ba57d4f99c4c900a62..b88352f5bd44588e6b4ec7dfbffba71f1bb0796e 100644
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -1126,7 +1126,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+     }
+ 
+     public boolean hasEffect(Holder<MobEffect> effect) {
+-        return this.activeEffects.containsKey(effect);
++        return !activeEffects.isEmpty() && this.activeEffects.containsKey(effect); // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     @Nullable
+@@ -4009,7 +4009,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+     // CraftBukkit start - collidable API
+     @Override
+     public boolean canCollideWithBukkit(Entity entity) {
+-        return this.isPushable() && this.collides != this.collidableExemptions.contains(entity.getUUID());
++        return this.isPushable() && this.collides != (!this.collidableExemptions.isEmpty() && this.collidableExemptions.contains(entity.getUUID())); // Leaf - Optimize map lookups with isEmpty check
+     }
+     // CraftBukkit end
+ 
+diff --git a/net/minecraft/world/entity/Mob.java b/net/minecraft/world/entity/Mob.java
+index 38b9931def2d407a3faa855db564e1d9ec1e636c..0c7e3233854d4bebff7b6ad36d62c916f706a1b8 100644
+--- a/net/minecraft/world/entity/Mob.java
++++ b/net/minecraft/world/entity/Mob.java
+@@ -1752,7 +1752,7 @@ public abstract class Mob extends LivingEntity implements EquipmentUser, Leashab
+         if (!player.getItemInHand(hand).isEmpty()) {
+             return InteractionResult.PASS;
+         }
+-        if (!passengers.isEmpty() || player.isPassenger()) {
++        if (passengers != Entity.EMPTY_PASSENGERS || player.isPassenger()) { // Leaf - Optimize map lookups with isEmpty check
+             return InteractionResult.PASS;
+         }
+         if (this instanceof TamableAnimal tamable) {
+diff --git a/net/minecraft/world/entity/monster/piglin/Piglin.java b/net/minecraft/world/entity/monster/piglin/Piglin.java
+index fe6eb99ea3d2deda317efe90ecb0987bb367313f..986ebd35986cf2518787beb9b9e362081f59fb07 100644
+--- a/net/minecraft/world/entity/monster/piglin/Piglin.java
++++ b/net/minecraft/world/entity/monster/piglin/Piglin.java
+@@ -521,7 +521,7 @@ public class Piglin extends AbstractPiglin implements CrossbowAttackMob, Invento
+ 
+     private Entity getTopPassenger(Entity vehicle, int maxPosition) {
+         List<Entity> passengers = vehicle.getPassengers();
+-        return maxPosition != 1 && !passengers.isEmpty() ? this.getTopPassenger(passengers.get(0), maxPosition - 1) : vehicle;
++        return maxPosition != 1 && passengers != Entity.EMPTY_PASSENGERS ? this.getTopPassenger(passengers.get(0), maxPosition - 1) : vehicle; // Leaf - Optimize map lookups with isEmpty check
+     }
+ 
+     @Override
+diff --git a/net/minecraft/world/entity/vehicle/AbstractMinecart.java b/net/minecraft/world/entity/vehicle/AbstractMinecart.java
+index 6df4d736d94b9e49a3eb3d59a329e37127aa64cd..1d0ceeea36b7b09766237e160fa1f88e2ffc484c 100644
+--- a/net/minecraft/world/entity/vehicle/AbstractMinecart.java
++++ b/net/minecraft/world/entity/vehicle/AbstractMinecart.java
+@@ -436,7 +436,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
+         this.setDeltaMovement(Mth.clamp(deltaMovement.x, -maxSpeed, maxSpeed), deltaMovement.y, Mth.clamp(deltaMovement.z, -maxSpeed, maxSpeed));
+ 
+         // Purpur start - Minecart settings and WASD controls
+-        if (level().purpurConfig.minecartControllable && !isInWater() && !isInLava() && !passengers.isEmpty()) {
++        if (level().purpurConfig.minecartControllable && !isInWater() && !isInLava() && passengers != Entity.EMPTY_PASSENGERS) { // Leaf - Optimize map lookups with isEmpty check
+             Entity passenger = passengers.get(0);
+             if (passenger instanceof net.minecraft.server.level.ServerPlayer player) {
+                 net.minecraft.world.entity.player.Input lastClientInput = player.getLastClientInput();

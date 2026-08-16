@@ -11,8 +11,8 @@
 - [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch
 - [ ] Cache-ShapePairKey-hash.patch
 - [ ] Cache-block-state-tags.patch
-- [ ] Cache-identifier-toString-and-hash.patch
-- [ ] Cache-world-border.patch
+- [x] Cache-identifier-toString-and-hash.patch
+- [x] Cache-world-border.patch — *포팅 불필요: 1.21.4 vanilla/Paper already caches it as a direct field (Level.java), so this patch does not apply*
 - [ ] Cache-world-generator-sea-level.patch
 - [ ] Check-frozen-ticks-before-landing-block.patch
 - [ ] Check-targeting-range-before-getting-visibility.patch
@@ -32,9 +32,9 @@
 - [ ] Only-update-frozen-ticks-if-changed.patch
 - [ ] Optimise-getEntities.patch
 - [ ] Optimize-PatchedDataComponentMap-equals.patch
-- [ ] Optimize-VarInt-write-and-VarLong-write.patch
+- [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
 - [x] Optimize-Vec3i-hashing.patch
-- [ ] Optimize-map-lookups-with-isEmpty-check.patch
+- [x] Optimize-map-lookups-with-isEmpty-check.patch
 - [ ] Optimize-matching-item-checks.patch
 - [ ] Optimize-noise-generation.patch
 - [ ] Optimize-pushable-selector.patch
@@ -47,11 +47,11 @@
 - [ ] Pluto-Expose-Direction-Plane-s-faces.patch
 - [ ] Pluto-don-t-load-chunks-to-spread-grass.patch
 - [ ] Pluto-reduce-allocation.patch
-- [ ] Pre-compute-VarLong-sizes.patch
+- [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch
 - [ ] Prevent-entities-random-strolling-into-non-ticking-c.patch
 - [ ] Reduce-AbstractContainerMenu-allocations.patch
-- [ ] Reduce-RandomSource-instances.patch
+- [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
 - [ ] Reduce-array-allocations.patch
 - [ ] Reduce-block-destruction-packet-allocations.patch
 - [ ] Reduce-debug-subscribers-overhead.patch
@@ -129,9 +129,9 @@
 
 - [ ] Fish-Parallel-World-Ticking-API.patch
 - [ ] Leaf-Test-Async-Executor.patch
-- [ ] Optimize-VarInt-write-and-VarLong-write.patch
+- [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
 - [ ] Optimize-block-entities-count.patch
-- [ ] Pre-compute-VarLong-sizes.patch
+- [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Reduce-array-allocations.patch
 - [ ] Remove-stream-in-CraftWorld-spawnParticle.patch
 - [ ] SIMD-support.patch
@@ -151,7 +151,7 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 1 / 138**
+**진행률: 9 / 138 체크됨** (고유 패치 기준 7개: 실제 포팅 3개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check / 이미 Gale·Patina 기반에 구현되어 있어 포팅 불필요로 확인 4개 — Cache world border, Optimize VarInt-VarLong write, Pre-compute VarLong sizes, Reduce RandomSource instances. 일부는 minecraft-patches·paper-patches 두 섹션에 동시 등장해 체크 줄 수는 9줄)
 
 ## 포팅 절차 (참고)
 
