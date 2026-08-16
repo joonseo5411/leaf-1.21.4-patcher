@@ -1,7 +1,8 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: BukkitPatcher <bukkitpatcher@local.dev>
 Date: Sun, 16 Aug 2026 20:13:39 +0900
-Subject: [PATCH] Use optimized collections in CB classes
+Subject: [PATCH] Optimize block entities count + Remove stream in
+ CraftWorld#spawnParticle
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java

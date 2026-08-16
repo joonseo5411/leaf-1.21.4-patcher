@@ -1,0 +1,121 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 20:31:28 +0900
+Subject: [PATCH] Fish - Parallel World Ticking API + optimize mob spawning
+ (spawnCategoryLimit Map to int array)
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+index 77e5fc9e2625e2e31f12ff46c80ca55d39d6fe33..234494e1d146ead1aa9f804c79f19c531e5e4690 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
+@@ -296,7 +296,8 @@ public final class CraftServer implements Server {
+     private final EntityMetadataStore entityMetadata = new EntityMetadataStore();
+     private final PlayerMetadataStore playerMetadata = new PlayerMetadataStore();
+     private final WorldMetadataStore worldMetadata = new WorldMetadataStore();
+-    private final Object2IntOpenHashMap<SpawnCategory> spawnCategoryLimit = new Object2IntOpenHashMap<>();
++    private static final SpawnCategory[] SPAWN_CATEGORIES = SpawnCategory.values(); // Leaf - optimize mob spawning
++    private final int[] spawnCategoryLimit = new int[SPAWN_CATEGORIES.length]; // Leaf - optimize mob spawning
+     private File container;
+     private WarningState warningState = WarningState.DEFAULT;
+     public ApiVersion minimumAPI;
+@@ -495,6 +496,7 @@ public final class CraftServer implements Server {
+         this.saveCommandsConfig();
+         this.overrideAllCommandBlockCommands = this.commandsConfiguration.getStringList("command-block-overrides").contains("*");
+         this.ignoreVanillaPermissions = this.commandsConfiguration.getBoolean("ignore-vanilla-permissions");
++        java.util.Arrays.fill(spawnCategoryLimit, -1); // Leaf - optimize mob spawning
+         this.overrideSpawnLimits();
+         console.autosavePeriod = this.configuration.getInt("ticks-per.autosave");
+         this.warningState = WarningState.value(this.configuration.getString("settings.deprecated-verbose"));
+@@ -527,9 +529,9 @@ public final class CraftServer implements Server {
+     }
+ 
+     private void overrideSpawnLimits() {
+-        for (SpawnCategory spawnCategory : SpawnCategory.values()) {
++        for (SpawnCategory spawnCategory : SPAWN_CATEGORIES) { // Leaf - optimize mob spawning
+             if (CraftSpawnCategory.isValidForLimits(spawnCategory)) {
+-                this.spawnCategoryLimit.put(spawnCategory, this.configuration.getInt(CraftSpawnCategory.getConfigNameSpawnLimit(spawnCategory)));
++                this.spawnCategoryLimit[spawnCategory.ordinal()] = this.configuration.getInt(CraftSpawnCategory.getConfigNameSpawnLimit(spawnCategory)); // Leaf - optimize mob spawning
+             }
+         }
+     }
+@@ -2626,7 +2628,7 @@ public final class CraftServer implements Server {
+     }
+     public int getSpawnLimitUnsafe(final SpawnCategory spawnCategory) {
+         // Paper end - Add mobcaps commands
+-        return this.spawnCategoryLimit.getOrDefault(spawnCategory, -1);
++        return this.spawnCategoryLimit[spawnCategory.ordinal()]; // Leaf - optimize mob spawning
+     }
+ 
+     @Override
+@@ -3475,4 +3477,11 @@ public final class CraftServer implements Server {
+         return photographerManager;
+     }
+     // Leaves end - replay mod api
++
++    // Fish start - Parallel World Ticking API
++    @Override
++    public boolean isParallelWorldTickingEnabled() {
++        return org.dreeam.leaf.config.modules.async.SparklyPaperParallelWorldTicking.enabled;
++    }
++    // Fish end - Parallel World Ticking API
+ }
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index cd7296ba8d507d832d526fb4a64ca538c2450041..4afa631a0382d46bc040b3dc6945ba03acddbf71 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -160,7 +160,8 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+     private final BiomeProvider biomeProvider;
+     private final List<BlockPopulator> populators = new ArrayList<BlockPopulator>();
+     private final BlockMetadataStore blockMetadata = new BlockMetadataStore(this);
+-    private final Object2IntOpenHashMap<SpawnCategory> spawnCategoryLimit = new Object2IntOpenHashMap<>();
++    private static final SpawnCategory[] SPAWN_CATEGORIES = SpawnCategory.values(); // Leaf - optimize mob spawning
++    private final int[] spawnCategoryLimit = new int[SPAWN_CATEGORIES.length]; // Leaf - optimize mob spawning
+     private final CraftPersistentDataContainer persistentDataContainer = new CraftPersistentDataContainer(CraftWorld.DATA_TYPE_REGISTRY);
+     private net.kyori.adventure.pointer.Pointers adventure$pointers; // Paper - implement pointers
+     // Paper start - void damage configuration
+@@ -292,8 +293,9 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         this.biomeProvider = biomeProvider;
+ 
+         this.environment = env;
++        java.util.Arrays.fill(spawnCategoryLimit, -1); // Leaf - optimize mob spawning
+         // Paper start - per world spawn limits
+-        for (SpawnCategory spawnCategory : SpawnCategory.values()) {
++        for (SpawnCategory spawnCategory : SPAWN_CATEGORIES) { // Leaf - optimize mob spawning
+             if (CraftSpawnCategory.isValidForLimits(spawnCategory)) {
+                 setSpawnLimit(spawnCategory, this.world.paperConfig().entities.spawning.spawnLimits.getInt(CraftSpawnCategory.toNMS(spawnCategory)));
+             }
+@@ -1852,7 +1854,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         return this.getSpawnLimitUnsafe(spawnCategory);
+     }
+     public final int getSpawnLimitUnsafe(final SpawnCategory spawnCategory) {
+-        int limit = this.spawnCategoryLimit.getOrDefault(spawnCategory, -1);
++        int limit = this.spawnCategoryLimit[spawnCategory.ordinal()]; // Leaf - optimize mob spawning
+         if (limit < 0) {
+             limit = this.server.getSpawnLimitUnsafe(spawnCategory);
+             // Paper end - Add mobcaps commands
+@@ -1865,7 +1867,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         Preconditions.checkArgument(spawnCategory != null, "SpawnCategory cannot be null");
+         Preconditions.checkArgument(CraftSpawnCategory.isValidForLimits(spawnCategory), "SpawnCategory.%s are not supported", spawnCategory);
+ 
+-        this.spawnCategoryLimit.put(spawnCategory, limit);
++        this.spawnCategoryLimit[spawnCategory.ordinal()] = limit; // Leaf - optimize mob spawning
+     }
+ 
+     @Override
+@@ -2590,4 +2592,15 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         return this.adventure$pointers;
+     }
+     // Paper end
++
++    // Fish start - Parallel World Ticking API
++    @Override
++    public long @NotNull [] getTickTimes() {
++        return this.world.tickTimes5s.getTimes();
++    }
++    @Override
++    public double getAverageTickTime() {
++        return this.world.tickTimes5s.getAverage();
++    }
++    // Fish end - Parallel World Ticking API
+ }

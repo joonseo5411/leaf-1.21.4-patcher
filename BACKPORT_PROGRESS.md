@@ -77,7 +77,7 @@
 - [x] Replace-parts-by-size-in-CubePointRange.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (CubePointRange.java에 size 필드 이미 존재)*
 - [x] Replace-throttle-tracker-map-with-optimized-collecti.patch — *포팅 불필요: 이미 Gale/Dionysus 기반에 포함되어 있음 (ServerHandshakePacketListenerImpl.java에 이미 적용됨)*
 - [ ] Rewrite-entity-despawn-time.patch — *보류: 엔티티 생명주기+청크시스템 광범위 변경, 전용 세션 권장*
-- [ ] SIMD-support.patch
+- [ ] SIMD-support.patch — *보류: 실제 벡터화 로직을 담은 gg.pufferfish.pufferfish.simd.SIMDDetection 클래스 소스를 못 찾음(Leaf/Pufferfish 저장소 어디에도 plain 파일로 없음, 이 패치는 단지 `.initialize()` 호출부만 추가). 빌드엔 이미 `--add-modules=jdk.incubator.vector` 플래그만 선점되어 있고 실제 구현체는 없는 상태. 클래스 자체를 처음부터 작성해야 해서 전용 세션 권장*
 - [x] Send-multiple-keep-alive-packets.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음*
 - [x] Skip-BlockPhysicsEvent-if-no-listeners.patch — *포팅 완료(1.21.4는 원본과 달리 cworld != null 체크가 추가로 있어 두 조건을 함께 사용)*
 - [x] Skip-PlayerCommandSendEvent-if-there-are-no-listener.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음 (Commands.java runSync에 이미 존재)*
@@ -94,9 +94,9 @@
 - [x] Update-boss-bar-within-tick.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (Raid.java에 isBarDirty 필드 이미 존재)*
 - [x] Use-linked-map-for-entity-trackers.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (ChunkMap.java entityMap이 이미 Int2ObjectLinkedOpenHashMap)*
 - [x] Variable-entity-wake-up-duration.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ActivationRange.java에 entityWakeUpDurationRatioStandardDeviation 로직 이미 존재)*
-- [ ] Virtual-thread-support-for-chat-executor.patch
-- [ ] Virtual-thread-support-for-download-pool.patch
-- [ ] async-chunk-sender.patch
+- [ ] Virtual-thread-support-for-chat-executor.patch — *보류: 아래 Virtual-thread-support 계열과 함께 처리, 신규 config 모듈(VirtualThreadSupport) 필요*
+- [ ] Virtual-thread-support-for-download-pool.patch — *보류: 위와 동일*
+- [ ] async-chunk-sender.patch — *보류: 청크 패킷 직렬화를 백그라운드 스레드로 오프로드하는 기능. minecraft-patches 쪽(RegionizedPlayerChunkLoader.java)이 moonrise 청크 시스템의 핵심 전송 상태 머신을 건드리는 고위험 변경이라(신규 org.dreeam.leaf.async.chunk.AsyncChunkSender 유틸리티는 upstream에 존재 확인) 전용 세션에서 신중히 검증 권장. paper-patches 쪽(ChunkPacketBlockController 2개 파일)은 그 자체로는 의미 없고 이 항목에 종속*
 - [x] cache-biome-for-mob-spawning-and-advancements.patch — *포팅 불필요: 이미 Leaf 자체 기반에 거의 동일한 형태로 포함되어 있음 (BiomeManager.getBiomeCached, OptimizeBiome config 모듈, NaturalSpawner/LocationPredicate 호출부 모두 이미 존재. 청크 패스트패스가 빠진 단일-인자 버전이지만 캐싱 자체는 동작함)*
 - [x] cache-collision-list.patch
 - [x] fast-bit-radix-sort.patch — *포팅 불필요: 이미 다른 형태(List<T>+Class 기반 API)로 구현되어 있음 (NearestItemSensor.itemSorter)*
@@ -129,31 +129,33 @@
 
 > `paper-server/.git` 워킹트리는 이미 존재했고(사전 설정됨), rebuild 태스크는 `leaf-server:rebuildPaperServerFeaturePatches`로 확인됨 (leaf-api의 `rebuildPaperApiFeaturePatches`에 대응). Batch 16에서 이 레이어를 처음 착수함.
 
-- [ ] Fish-Parallel-World-Ticking-API.patch
+- [x] Fish-Parallel-World-Ticking-API.patch — *포팅 완료. CraftServer#isParallelWorldTickingEnabled + CraftWorld#getTickTimes/getAverageTickTime, leaf-api의 Server.java/World.java에 대응 인터페이스 메서드 추가*
 - [x] Leaf-Test-Async-Executor.patch — *범위 밖: 런타임 최적화가 아닌 JUnit 테스트 파일이고 @LeafTest 환경 애너테이션이 이 코드베이스에 없음, 최적화 백포트 범위에서 제외*
 - [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
 - [x] Optimize-block-entities-count.patch — *포팅 완료. CraftWorld#getTileEntityCount에 config-gated 단축 경로 추가(OptimizeBlockEntities.enabled, 기본값 true — 기존 코드베이스에 이미 존재하던 설정값)*
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
-- [ ] Reduce-array-allocations.patch
+- [ ] Reduce-array-allocations.patch — *보류: minecraft-patches의 동명 패치와 같은 me.titaniumtown.ArrayConstants 유틸리티에 종속, 그쪽과 함께 전용 세션에서 처리*
 - [x] Remove-stream-in-CraftWorld-spawnParticle.patch
-- [ ] SIMD-support.patch
+- [ ] SIMD-support.patch — *보류: bStats 메트릭 리포팅 훅뿐이라 사소하지만, 실제 SIMDDetection 클래스(minecraft-patches의 동명 패치와 공유)가 없어서 종속됨*
 - [x] Use-optimized-collections-in-CB-classes.patch — *포팅 완료 (5개 파일: CraftBlockStates/CraftBossBar/CraftEntityTypes/CraftInventoryCreator/CraftMagicNumbers, HashMap→EnumMap/IdentityHashMap)*
-- [ ] Virtual-thread-support-for-bukkit-async-scheduler.patch
-- [ ] Virtual-thread-support-for-chat-executor.patch
-- [ ] Virtual-thread-support-for-folia-async-scheduler.patch
-- [ ] Virtual-thread-support.patch
-- [ ] optimize-despawn.patch
-- [ ] optimize-mob-spawning.patch
+- [ ] Virtual-thread-support-for-bukkit-async-scheduler.patch — *보류: 신규 config 모듈(org.dreeam.leaf.config.modules.opt.VirtualThreadSupport) 자체가 없고, 각 executor(chatExecutor 등)의 초기화 코드도 가상 스레드 지원이 전혀 없는 상태라 4개 패치를 함께 처리해야 함. 스레딩 시맨틱 변경이라 전용 세션 권장*
+- [ ] Virtual-thread-support-for-chat-executor.patch — *보류: 위와 동일*
+- [ ] Virtual-thread-support-for-folia-async-scheduler.patch — *보류: 위와 동일*
+- [ ] Virtual-thread-support.patch — *포팅 불필요/범위 밖: bStats 메트릭 리포팅 훅뿐이고 upstream 자체가 "Deprecated, remove in the future" 표시함, 실질적 기능 없음*
+- [x] optimize-despawn.patch — *포팅 완료 (전체 2개 훅 모두 적용: WorldConfiguration#despawnRanges EnumMap화 + DespawnRange 필드 public화)*
+- [x] optimize-mob-spawning.patch — *부분 포팅. CraftServer/CraftWorld의 spawnCategoryLimit Map→int[] 배열화는 완료. CustomChunkGenerator#getMobsAtChunk 훅은 InternalChunkGenerator 인터페이스에 해당 메서드 자체가 없어 스킵(더 큰 "청크 컨텍스트 전달" 리팩터링의 일부로 추정, 이번엔 미포함)*
 
 ## leaf-api (5개)
 
 - [x] Cache-namespacedKey-toString-and-hash.patch
-- [ ] Fish-Parallel-World-Ticking-API.patch — *보류: API 인터페이스만으로는 불완전, 실제 구현체(CraftServer 등)는 미착수 paper-patches 레이어에 있음*
-- [ ] Player-canSee-by-entity-UUID.patch — *보류: Player.java에 추상 메서드만 추가하는 패치라 실제 구현(CraftPlayer)이 필요한데 그건 미착수 paper-patches 레이어에 있음. 구현 없이 인터페이스만 추가하면 컴파일이 깨지거나 미구현 API가 됨*
+- [x] Fish-Parallel-World-Ticking-API.patch — *포팅 완료. paper-patches 레이어 착수 후 Server.java#isParallelWorldTickingEnabled + World.java#getTickTimes/getAverageTickTime 인터페이스 메서드와 CraftServer/CraftWorld 구현 모두 연결*
+- [x] Player-canSee-by-entity-UUID.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음 (Player.java에 canSeePlayer(UUID) 선언 + CraftPlayer.java에 구현 모두 이미 존재)*
 - [x] Replace-data-maps-with-optimized-collection.patch
-- [ ] SIMD-support.patch — *보류: paper-patches 레이어의 SIMD-support(0011)와 짝을 이루는 패치, 그쪽 없이는 의미 없음*
+- [ ] SIMD-support.patch — *보류: paper-patches/minecraft-patches의 동명 패치와 마찬가지로 실제 SIMDDetection 클래스가 없어서 종속됨*
 
-**진행률: 101 / 138 체크됨** (실제 포팅 38개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 106 / 138 체크됨** (실제 포팅 40개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 17**: `Fish-Parallel-World-Ticking-API`(leaf-api의 Server.java#isParallelWorldTickingEnabled + World.java#getTickTimes/getAverageTickTime 선언 + CraftServer/CraftWorld 구현 모두 연결, 기존에 이미 있던 SparklyPaperParallelWorldTicking 기능을 노출하는 모니터링 API), `optimize-mob-spawning`(CraftServer/CraftWorld의 spawnCategoryLimit Map→int[] 배열화 2개 훅 포팅, CustomChunkGenerator#getMobsAtChunk 훅은 InternalChunkGenerator에 해당 메서드가 없어 스킵)을 포팅. `Player-canSee-by-entity-UUID`는 이미 Gale/Purpur 기반에 선언+구현 모두 존재해 불필요 확인. `SIMD-support`는 실제 `gg.pufferfish.pufferfish.simd.SIMDDetection` 클래스를 Leaf/Pufferfish 어느 저장소에서도 못 찾음(빌드엔 `--add-modules=jdk.incubator.vector` 플래그만 선점되어 있고 실제 구현체 없음)이라 보류. Virtual-thread-support 4종 세트는 신규 config 모듈 및 executor 초기화 코드 자체가 전혀 없어 보류. Reduce-array-allocations(paper 레이어)는 minecraft-patches와 동일하게 ArrayConstants 유틸리티 부재로 보류. async-chunk-sender는 minecraft-patches 쪽 전체 패치(248줄, RegionizedPlayerChunkLoader.java의 청크 전송 상태 머신 핵심부 변경)까지 읽어봤고 실제 AsyncChunkSender 유틸리티는 upstream에 존재함을 확인했지만, 리스크가 커서 전용 세션으로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증(자연 몹 스폰이 spawn limit 로직을 반복 실행하므로 관련 회귀 여부 특히 주의, 예외 0건).
 
 **Batch 16 (paper-patches 레이어 최초 착수)**: `paper-server/.git` 워킹트리는 이미 존재했음을 확인, `leaf-server:rebuildPaperServerFeaturePatches` 태스크로 rebuild 가능함을 확인. `Optimize-block-entities-count`(CraftWorld#getTileEntityCount config-gated 단축 경로), `Remove-stream-in-CraftWorld-spawnParticle`(ServerLevel#sendParticlesSourceBukkit 헬퍼 신규 추가 + CraftWorld#spawnParticle 연결, minecraft-patches 레이어에도 함께 반영), `Use-optimized-collections-in-CB-classes`(5개 CraftBukkit 클래스의 HashMap→EnumMap/IdentityHashMap 교체)를 포팅. `optimize-despawn`의 준비 훅(WorldConfiguration#despawnRanges EnumMap화, DespawnRange 필드 public화)도 독자적으로 포팅했으나 DespawnMap 본체(별도 항목, optimize-mob-despawn)는 여전히 보류. `Leaf-Test-Async-Executor`는 런타임 최적화가 아닌 JUnit 테스트(+@LeafTest 애너테이션 부재)라 범위 밖으로 확인. 커밋 분리 중 사소한 git amend 실수가 있었으나(엉뚱한 커밋에 amend됨) `git diff base..HEAD --stat`으로 의도한 8개 파일이 정확히 반영됐는지 검증 후 진행. 프레시 월드 3개 차원 부팅 스모크 테스트(예외 0건) + 헤드리스 봇으로 엔티티 소환(/summon)과 파티클(/particle) 명령 실전 테스트까지 통과.
 

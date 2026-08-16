@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 20:31:23 +0900
+Subject: [PATCH] Fish - Parallel World Ticking API
+
+
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index a1b76899a416b997c6844bcaf837219ce0726496..7619f3bfb539d730dd2e50f71b3066b0a68e0fc3 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -2906,4 +2906,13 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+     // Leaves start - Photographer API
+     @NotNull org.leavesmc.leaves.entity.PhotographerManager getPhotographerManager();
+     // Leaves end - Photographer API
++
++    // Fish start - Parallel World Ticking API
++    /**
++     * Checks if parallel world ticking is enabled on this server.
++     *
++     * @return true if parallel world ticking is enabled
++     */
++    boolean isParallelWorldTickingEnabled();
++    // Fish end - Parallel World Ticking API
+ }
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 64ea97cce246d5eab8f45de64bbf92245c3f9330..6cff138c28452bb20cfd663b0cf0063887d16b06 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -4512,6 +4512,22 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
+     @NotNull
+     public Collection<GeneratedStructure> getStructures(int x, int z, @NotNull Structure structure);
+ 
++    // Fish start - Parallel World Ticking API
++    /**
++     * Gets the tick times (in nanoseconds) for the last 100 ticks of this world.
++     *
++     * @return an array containing the tick times for the last 100 ticks
++     */
++    long @NotNull [] getTickTimes();
++
++    /**
++     * Gets the average tick time (in milliseconds) for the last 100 ticks of this world.
++     *
++     * @return the average tick time
++     */
++    double getAverageTickTime();
++    // Fish end - Parallel World Ticking API
++
+     /**
+      * Represents various map environment types that a world may be
+      */
