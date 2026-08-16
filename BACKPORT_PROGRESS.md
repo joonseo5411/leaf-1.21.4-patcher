@@ -104,14 +104,14 @@
 - [x] optimize-LevelChunk-getBlockStateFinal.patch
 - [x] optimize-PalettedContainer-get.patch
 - [ ] optimize-PathNavigation-followThePath.patch
-- [ ] optimize-SimpleBitStorage-object-layout.patch
+- [x] optimize-SimpleBitStorage-object-layout.patch
 - [ ] optimize-applyMovementEmissionAndPlaySound.patch
 - [ ] optimize-attribute.patch
 - [x] optimize-canHoldAnyFluid.patch
 - [ ] optimize-checkInsideBlocks-calls.patch
 - [ ] optimize-collidedAlongVector.patch
 - [ ] optimize-collision-shape.patch
-- [ ] optimize-get-chunk.patch
+- [x] optimize-get-chunk.patch — *Level#getBlockState(BlockPos) hunk만 포팅. SpreadingSnowyBlock.java 훅은 1.21.4에 해당 클래스가 없어(SpreadingSnowyDirtBlock으로 명칭 상이) 및 getChunkAtIfLoadedUnchecked 미존재로 스킵*
 - [x] optimize-getOnPos.patch
 - [ ] optimize-goal-selector.patch
 - [x] optimize-isStateClimbable.patch
@@ -121,7 +121,7 @@
 - [ ] optimize-tickEffects.patch
 - [ ] optimize-waypoint.patch
 - [x] reduce-enchantment-allocations.patch
-- [ ] remove-shouldTickBlocksAt-check.patch
+- [ ] remove-shouldTickBlocksAt-check.patch — *포팅 비권장: upstream 커밋 사유가 "BoundTickingBlockEntity#tick에 중복 체크 존재"인데 1.21.4엔 BoundTickingBlockEntity 클래스 자체가 없어 전제가 성립하지 않음*
 - [ ] rewrite-InsideBrownianWalk.patch
 - [ ] thread-unsafe-chunk-map.patch
 
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 56 / 138 체크됨** (실제 포팅 20개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 62 / 138 체크됨** (실제 포팅 22개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 9**: `optimize-SimpleBitStorage-object-layout`(불필요한 캐시된 long 필드 2개 제거, `cellIndex()`를 `Integer.toUnsignedLong()` 인라인 연산으로 재계산), `optimize-get-chunk`(`Level#getBlockState(BlockPos)`가 x/y/z를 로컬 변수로 뽑아 `chunk.getBlockState(x, y, z)` 오버로드 직접 호출, `BlockPos` 객체 재참조 감소 — 원본 패치의 SpreadingSnowyBlock.java 훅은 1.21.4에 해당 클래스/메서드 부재로 스킵)를 포팅. 프레시 월드로 3개 차원(overworld/nether/end) 전부 부팅 스모크 테스트, 예외 0건 확인.
 
 **Phase 2 완료**: `Cache-block-state-tags` 기반 패치(BlockState에 `tagFlag` 캐시 필드 + `org.dreeam.leaf.util.BlockMasks` 유틸리티 추가; `pathType` 캐시는 1.21.4에 이미 별도로 존재해서 손댈 필요 없었음)를 실제로 포팅해서 `optimize-getOnPos`, `optimize-isStateClimbable`, `optimize-canHoldAnyFluid` 3개를 추가로 풀었음. 펜스/벽/펜스게이트/사다리/가루눈/트랩도어/덩굴/유체/가마솥 상호작용을 헤드리스 봇으로 전부 실전 테스트, 예외 0건.
 

@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 17:38:15 +0900
+Subject: [PATCH] optimize get chunk (Level#getBlockState(BlockPos) hunk only)
+
+Use the int-coordinate ChunkAccess#getBlockState(x,y,z) overload
+instead of the BlockPos-taking one, avoiding a redundant unpack.
+
+Backported from Leaf ver/26.2 (original author: hayanesuru) to
+ver/1.21.4. Skipped the SpreadingSnowyBlock.java hunk from upstream -
+that class doesn't exist under that name in 1.21.4 (it's
+SpreadingSnowyDirtBlock.java here) and the getChunkAtIfLoadedUnchecked
+method it relies on doesn't exist in this codebase; not worth adding
+just for this.
+
+diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
+index f679ed1fb96e135b044359e55d69bfa803a6b215..f2fd9036affe1e9ba7b22e820319d91bc167a27f 100644
+--- a/net/minecraft/world/level/Level.java
++++ b/net/minecraft/world/level/Level.java
+@@ -1424,8 +1424,13 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+         if (this.isOutsideBuildHeight(pos)) {
+             return Blocks.VOID_AIR.defaultBlockState();
+         } else {
+-            ChunkAccess chunk = this.getChunk(pos.getX() >> 4, pos.getZ() >> 4, ChunkStatus.FULL, true); // Paper - manually inline to reduce hops and avoid unnecessary null check to reduce total byte code size, this should never return null and if it does we will see it the next line but the real stack trace will matter in the chunk engine
+-            return chunk.getBlockState(pos);
++            // Leaf start - optimize get chunk
++            int x = pos.getX();
++            int y = pos.getY();
++            int z = pos.getZ();
++            ChunkAccess chunk = this.getChunk(x >> 4, z >> 4, ChunkStatus.FULL, true); // Paper - manually inline to reduce hops and avoid unnecessary null check to reduce total byte code size, this should never return null and if it does we will see it the next line but the real stack trace will matter in the chunk engine
++            return chunk.getBlockState(x, y, z);
++            // Leaf end - optimize get chunk
+         }
+     }
+ 
