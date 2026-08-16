@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 17:15:34 +0900
+Subject: [PATCH] optimize LevelChunk#getBlockStateFinal
+
+Replace the getSectionIndex(y) method call + Blocks.AIR.defaultBlockState()
+allocation-lookup with a direct index computation and the existing
+cached AIR_BLOCKSTATE constant.
+
+Backported from Leaf ver/26.2 (original author: hayanesuru) to
+ver/1.21.4.
+
+diff --git a/net/minecraft/world/level/chunk/LevelChunk.java b/net/minecraft/world/level/chunk/LevelChunk.java
+index 44b672671e0bea6a5f91e9b8573f9a8225a20f6a..e2430c8440163fd45574070f8d39e41f1c9f5948 100644
+--- a/net/minecraft/world/level/chunk/LevelChunk.java
++++ b/net/minecraft/world/level/chunk/LevelChunk.java
+@@ -349,12 +349,18 @@ public class LevelChunk extends ChunkAccess implements ca.spottedleaf.moonrise.p
+     }
+     public BlockState getBlockStateFinal(final int x, final int y, final int z) {
+         // Copied and modified from below
+-        final int sectionIndex = this.getSectionIndex(y);
+-        if (sectionIndex < 0 || sectionIndex >= this.sections.length
+-            || this.sections[sectionIndex].nonEmptyBlockCount == 0) {
+-            return Blocks.AIR.defaultBlockState();
++        // Leaf start - optimize LevelChunk#getBlockStateFinal
++        final int sectionIndex = (y >> 4) - this.minSection;
++        if (sectionIndex < 0 || sectionIndex >= this.sections.length) {
++            return AIR_BLOCKSTATE;
++        } else {
++            LevelChunkSection section = this.sections[sectionIndex];
++            if (section.nonEmptyBlockCount == 0) {
++                return AIR_BLOCKSTATE;
++            }
++            return section.states.get((y & 15) << 8 | (z & 15) << 4 | x & 15);
+         }
+-        return this.sections[sectionIndex].states.get((y & 15) << 8 | (z & 15) << 4 | x & 15);
++        // Leaf end - optimize LevelChunk#getBlockStateFinal
+     }
+     @Override
+     public BlockState getBlockState(BlockPos pos) {

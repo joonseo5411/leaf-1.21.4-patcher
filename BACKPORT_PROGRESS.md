@@ -101,8 +101,8 @@
 - [x] cache-collision-list.patch
 - [x] fast-bit-radix-sort.patch — *포팅 불필요: 이미 다른 형태(List<T>+Class 기반 API)로 구현되어 있음 (NearestItemSensor.itemSorter)*
 - [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
-- [ ] optimize-LevelChunk-getBlockStateFinal.patch
-- [ ] optimize-PalettedContainer-get.patch
+- [x] optimize-LevelChunk-getBlockStateFinal.patch
+- [x] optimize-PalettedContainer-get.patch
 - [ ] optimize-PathNavigation-followThePath.patch
 - [ ] optimize-SimpleBitStorage-object-layout.patch
 - [ ] optimize-applyMovementEmissionAndPlaySound.patch

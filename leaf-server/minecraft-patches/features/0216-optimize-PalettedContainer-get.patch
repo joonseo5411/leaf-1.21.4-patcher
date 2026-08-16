@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 17:15:34 +0900
+Subject: [PATCH] optimize PalettedContainer#get
+
+Remove a redundant cast in readPalette() - Data<T> already directly
+implements FastPaletteData<T> in this codebase. The VarHandle-based
+acquire read from upstream's version of this patch wasn't needed here
+since our 'data' field is already 'public volatile' (upstream's is
+private, requiring VarHandle for equivalent memory semantics).
+
+Backported from Leaf ver/26.2 (original author: hayanesuru) to
+ver/1.21.4.
+
+diff --git a/net/minecraft/world/level/chunk/PalettedContainer.java b/net/minecraft/world/level/chunk/PalettedContainer.java
+index 82a5d45858067f8bd6d000d2eafc13fe2cb6f834..a1e8cb2032afe396bec4d05b96253371002ee78d 100644
+--- a/net/minecraft/world/level/chunk/PalettedContainer.java
++++ b/net/minecraft/world/level/chunk/PalettedContainer.java
+@@ -105,7 +105,7 @@ public class PalettedContainer<T> implements PaletteResize<T>, PalettedContainer
+     }
+ 
+     private T readPalette(final PalettedContainer.Data<T> data, final int paletteIdx) {
+-        final T[] palette = ((ca.spottedleaf.moonrise.patches.fast_palette.FastPaletteData<T>)(Object)data).moonrise$getPalette();
++        final T[] palette = data.moonrise$getPalette(); // Leaf - optimize PalettedContainer#get - remove type cast
+         if (palette == null) {
+             return this.readPaletteSlow(data, paletteIdx);
+         }
