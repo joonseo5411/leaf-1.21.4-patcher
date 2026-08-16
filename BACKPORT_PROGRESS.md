@@ -65,7 +65,7 @@
 - [x] Reduce-villager-item-re-pickup.patch — *포팅 불필요: 이미 Gale/EMC 기반에 포함되어 있음*
 - [x] Remove-iterators-from-Inventory.patch — *포팅 불가: 원본은 `this.equipment`(EnumMap 기반) + `EQUIPMENT_SLOT_MAPPING`/`EQUIPMENT_SLOTS_SORTED_BY_INDEX` 구조를 전제로 하는데 1.21.4 Inventory.java는 이 구조 자체가 없음(별도 armor/offhand NonNullList 구조), 상위 버전의 인벤토리 아키텍처 리팩터링에 의존적이라 포팅 불가*
 - [x] Remove-lambda-from-ticking-guard.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
-- [ ] Remove-stream-in-CraftWorld-spawnParticle.patch — *보류: ServerLevel.java에 새 헬퍼 메서드(sendParticlesSourceBukkit) 추가는 확인했지만, 실제 호출부는 CraftWorld.java(leaf-server/paper-patches 레이어, 이번 세션에 미착수)에 있어 그쪽 없이는 죽은 코드가 됨*
+- [x] Remove-stream-in-CraftWorld-spawnParticle.patch — *포팅 완료. paper-patches 레이어 착수 후 ServerLevel#sendParticlesSourceBukkit 헬퍼 + CraftWorld#spawnParticle 호출부까지 모두 연결*
 - [x] Remove-stream-in-MobSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음 (변수명만 다름)*
 - [x] Remove-stream-in-TemptingSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Remove-stream-on-PlayerDetector.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
@@ -115,7 +115,7 @@
 - [x] optimize-getOnPos.patch
 - [ ] optimize-goal-selector.patch — *보류: 신규 커스텀 Set 구현체(org.dreeam.leaf.util.map.BinaryGoalSet) 전체를 새로 작성해야 함, GoalSelector 순회 순서 버그 시 전체 몹 AI가 깨질 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] optimize-isStateClimbable.patch
-- [ ] optimize-mob-despawn.patch — *보류: 신규 KDTree3D 유틸리티 + 신규 config 모듈(OptimizeDespawn) + Mob 디스폰 로직 전체 재구현(entity.checkDespawn()을 우회) 필요. 버그 시 테임된/네임태그 붙은 몹이 잘못 디스폰될 리스크가 있어 전용 세션에서 신중히 검증 권장*
+- [ ] optimize-mob-despawn.patch — *보류: 신규 KDTree3D 유틸리티 + 신규 config 모듈(OptimizeDespawn) + Mob 디스폰 로직 전체 재구현(entity.checkDespawn()을 우회) 필요. 버그 시 테임된/네임태그 붙은 몹이 잘못 디스폰될 리스크가 있어 전용 세션에서 신중히 검증 권장. (paper-patches 레이어의 준비 훅인 optimize-despawn.patch — WorldConfiguration#despawnRanges EnumMap화 + DespawnRange 필드 public화 — 는 독자적으로 포팅 완료, DespawnMap 본체는 여전히 보류)*
 - [x] optimize-movement-vector-normalization.patch — *포팅 불필요: 1.21.4의 Entity#checkFallDamage엔 이 최적화 대상인 8블록 clamp/normalize 로직 자체가 없음(더 최신 MC 버전에서 추가된 로직)*
 - [x] optimize-no-action-time.patch — *포팅 완료. 신규 config 모듈 OptimizeNoActionTime 추가(disableLightCheck, 기본값 false)*
 - [x] optimize-tickEffects.patch — *포팅 완료(1.21.4엔 ServerLevel 분기가 없는 더 단순한 구조라 그 구조에 맞춰 empty-check 가드만 적용)*
@@ -127,17 +127,17 @@
 
 ## paper-patches (15개)
 
-> 이 섹션은 이번 세션에서 미착수. `paper-server/.git` 워킹트리 + 별도 rebuild 태스크 확인이 먼저 필요함 (leaf-api의 `rebuildPaperApiFeaturePatches`에 대응하는 leaf-server 쪽 태스크는 아직 미탐색).
+> `paper-server/.git` 워킹트리는 이미 존재했고(사전 설정됨), rebuild 태스크는 `leaf-server:rebuildPaperServerFeaturePatches`로 확인됨 (leaf-api의 `rebuildPaperApiFeaturePatches`에 대응). Batch 16에서 이 레이어를 처음 착수함.
 
 - [ ] Fish-Parallel-World-Ticking-API.patch
-- [ ] Leaf-Test-Async-Executor.patch
+- [x] Leaf-Test-Async-Executor.patch — *범위 밖: 런타임 최적화가 아닌 JUnit 테스트 파일이고 @LeafTest 환경 애너테이션이 이 코드베이스에 없음, 최적화 백포트 범위에서 제외*
 - [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
-- [ ] Optimize-block-entities-count.patch
+- [x] Optimize-block-entities-count.patch — *포팅 완료. CraftWorld#getTileEntityCount에 config-gated 단축 경로 추가(OptimizeBlockEntities.enabled, 기본값 true — 기존 코드베이스에 이미 존재하던 설정값)*
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Reduce-array-allocations.patch
-- [ ] Remove-stream-in-CraftWorld-spawnParticle.patch
+- [x] Remove-stream-in-CraftWorld-spawnParticle.patch
 - [ ] SIMD-support.patch
-- [ ] Use-optimized-collections-in-CB-classes.patch
+- [x] Use-optimized-collections-in-CB-classes.patch — *포팅 완료 (5개 파일: CraftBlockStates/CraftBossBar/CraftEntityTypes/CraftInventoryCreator/CraftMagicNumbers, HashMap→EnumMap/IdentityHashMap)*
 - [ ] Virtual-thread-support-for-bukkit-async-scheduler.patch
 - [ ] Virtual-thread-support-for-chat-executor.patch
 - [ ] Virtual-thread-support-for-folia-async-scheduler.patch
@@ -153,7 +153,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch — *보류: paper-patches 레이어의 SIMD-support(0011)와 짝을 이루는 패치, 그쪽 없이는 의미 없음*
 
-**진행률: 96 / 138 체크됨** (실제 포팅 34개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 101 / 138 체크됨** (실제 포팅 38개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 16 (paper-patches 레이어 최초 착수)**: `paper-server/.git` 워킹트리는 이미 존재했음을 확인, `leaf-server:rebuildPaperServerFeaturePatches` 태스크로 rebuild 가능함을 확인. `Optimize-block-entities-count`(CraftWorld#getTileEntityCount config-gated 단축 경로), `Remove-stream-in-CraftWorld-spawnParticle`(ServerLevel#sendParticlesSourceBukkit 헬퍼 신규 추가 + CraftWorld#spawnParticle 연결, minecraft-patches 레이어에도 함께 반영), `Use-optimized-collections-in-CB-classes`(5개 CraftBukkit 클래스의 HashMap→EnumMap/IdentityHashMap 교체)를 포팅. `optimize-despawn`의 준비 훅(WorldConfiguration#despawnRanges EnumMap화, DespawnRange 필드 public화)도 독자적으로 포팅했으나 DespawnMap 본체(별도 항목, optimize-mob-despawn)는 여전히 보류. `Leaf-Test-Async-Executor`는 런타임 최적화가 아닌 JUnit 테스트(+@LeafTest 애너테이션 부재)라 범위 밖으로 확인. 커밋 분리 중 사소한 git amend 실수가 있었으나(엉뚱한 커밋에 amend됨) `git diff base..HEAD --stat`으로 의도한 8개 파일이 정확히 반영됐는지 검증 후 진행. 프레시 월드 3개 차원 부팅 스모크 테스트(예외 0건) + 헤드리스 봇으로 엔티티 소환(/summon)과 파티클(/particle) 명령 실전 테스트까지 통과.
 
 **Batch 15 (조사 위주, 신규 포팅 없음)**: Spread-out-sending-all-player-info는 이미 Gale/Purpur 기반에 구현되어 있어 불필요 확인. `Add-io_uring-support`는 실제로 시도해봄 — netty-incubator-transport-native-io_uring:0.0.26.Final 의존성(linux-x86_64/aarch_64 클래시파이어 확인됨)까지 추가했으나, 대상 클래스(EventLoopGroupHolder.java)가 1.21.4엔 존재하지 않고 훨씬 단순한 네트워크 부트스트랩 구조(ServerConnectionListener.java 안에서 NIO/Epoll만 직접 분기)라 핵심 접속 수락 로직을 직접 건드려야 해서 되돌림(빌드 의존성 변경도 원복 완료, git status 클린 확인). 나머지 대형 후보(Paper-PR-Optimise-temptation-lookups 2개, Luminol-Configurable-region-format-framework, Replace-brain-with-optimized-collection 등)는 각각 33개+ 파일/월드 저장 포맷/전체 몹 AI 저장소 급의 초대형·고위험 변경이라 스코프만 확인하고 보류 처리. leaf-api의 Fish-Parallel-World-Ticking-API/Player-canSee-by-entity-UUID/SIMD-support는 API 인터페이스만 있고 실제 구현이 미착수 paper-patches 레이어에 있어 보류. paper-patches(15개) 섹션 전체는 이번 세션에서 레이어 자체를 미착수.
 

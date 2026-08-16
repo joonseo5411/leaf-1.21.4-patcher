@@ -1,0 +1,58 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 20:15:40 +0900
+Subject: [PATCH] add sendParticlesSourceBukkit helper (Remove stream in
+ CraftWorld#spawnParticle)
+
+
+diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
+index 5e2a66416bde6cebee1ea1c3b30e233541595ec5..cd93a9f9f92e263a6c200377580fa0586fc80535 100644
+--- a/net/minecraft/server/level/ServerLevel.java
++++ b/net/minecraft/server/level/ServerLevel.java
+@@ -2255,6 +2255,46 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+         return i;
+     }
+ 
++    // Leaf start - Remove stream in CraftWorld#spawnParticle
++    // Copy from ServerLevel#sendParticlesSource
++    public <T extends ParticleOptions> void sendParticlesSourceBukkit(
++        List<org.bukkit.entity.Player> bukkitReceivers,
++        @javax.annotation.Nullable Entity sender,
++        T type,
++        boolean overrideLimiter,
++        boolean alwaysShow,
++        double x,
++        double y,
++        double z,
++        int particleCount,
++        double xOffset,
++        double yOffset,
++        double zOffset,
++        double speed
++    ) {
++        ClientboundLevelParticlesPacket clientboundLevelParticlesPacket = new ClientboundLevelParticlesPacket(
++            type, overrideLimiter, alwaysShow, x, y, z, (float) xOffset, (float) yOffset, (float) zOffset, (float) speed, particleCount
++        );
++
++        if (bukkitReceivers == null) {
++            for (int i = 0, size = players.size(); i < size; i++) { // Paper - particle API
++                ServerPlayer serverPlayer = players.get(i); // Paper - particle API
++                if (sender != null && !serverPlayer.getBukkitEntity().canSee(sender.getBukkitEntity())) continue; // CraftBukkit
++
++                this.sendParticles(serverPlayer, overrideLimiter, x, y, z, clientboundLevelParticlesPacket);
++            }
++        } else {
++            for (int i = 0, size = bukkitReceivers.size(); i < size; i++) { // Paper - particle API
++                org.bukkit.entity.Player bukkitPlayer = bukkitReceivers.get(i); // Paper - particle API
++                ServerPlayer serverPlayer = ((org.bukkit.craftbukkit.entity.CraftPlayer) bukkitPlayer).getHandle();
++                if (sender != null && !serverPlayer.getBukkitEntity().canSee(sender.getBukkitEntity())) continue; // CraftBukkit
++
++                this.sendParticles(serverPlayer, overrideLimiter, x, y, z, clientboundLevelParticlesPacket);
++            }
++        }
++    }
++    // Leaf end - Remove stream in CraftWorld#spawnParticle
++
+     public <T extends ParticleOptions> boolean sendParticles(
+         ServerPlayer player,
+         T particle,

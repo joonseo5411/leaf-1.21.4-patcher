@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 20:13:39 +0900
+Subject: [PATCH] Optimize block entities count and remove stream in CraftWorld#spawnParticle
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index 64d95bc035fbafa660e7f3d7393da4bf8839b2f9..cd7296ba8d507d832d526fb4a64ca538c2450041 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -213,6 +213,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+ 
+     @Override
+     public int getTileEntityCount() {
++        if (org.dreeam.leaf.config.modules.opt.OptimizeBlockEntities.enabled) return world.blockEntityTickers.size(); // Leaf - Optimize block entities count
+         // We don't use the full world tile entity list, so we must iterate chunks
+         int size = 0;
+         for (ChunkHolder playerchunk : ca.spottedleaf.moonrise.common.PlatformHooks.get().getVisibleChunkHolders(this.world)) {
+@@ -2210,8 +2211,8 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         if (data != null) {
+             Preconditions.checkArgument(particle.getDataType().isInstance(data), "data (%s) should be %s", data.getClass(), particle.getDataType());
+         }
+-        this.getHandle().sendParticlesSource(
+-                receivers == null ? this.getHandle().players() : receivers.stream().map(player -> ((CraftPlayer) player).getHandle()).collect(java.util.stream.Collectors.toList()), // Paper -  Particle API
++        this.getHandle().sendParticlesSourceBukkit( // Leaf - Remove stream in CraftWorld#spawnParticle
++                receivers, // Paper -  Particle API // Leaf - Remove stream in CraftWorld#spawnParticle
+                 sender != null ? ((CraftPlayer) sender).getHandle() : null, // Sender // Paper - Particle API
+                 CraftParticle.createParticleParam(particle, data), // Particle
+                 force,

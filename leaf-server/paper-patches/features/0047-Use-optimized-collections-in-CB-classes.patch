@@ -1,0 +1,92 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 20:13:39 +0900
+Subject: [PATCH] Use optimized collections in CB classes
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java
+index 08a06c23c831a4de45b3e537228b837911019da8..1192884ae2a9d6b51fc47aa0ff5efeb217655f1c 100644
+--- a/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java
++++ b/src/main/java/org/bukkit/craftbukkit/block/CraftBlockStates.java
+@@ -116,7 +116,7 @@ public final class CraftBlockStates {
+         }
+     }
+ 
+-    private static final Map<Material, BlockStateFactory<?>> FACTORIES = new HashMap<>();
++    private static final Map<Material, BlockStateFactory<?>> FACTORIES = new java.util.EnumMap<>(Material.class); // Leaf - Use optimized collections in CB classes
+     private static final BlockStateFactory<?> DEFAULT_FACTORY = new BlockStateFactory<CraftBlockState>(CraftBlockState.class) {
+         @Override
+         public CraftBlockState createBlockState(World world, BlockPos blockPosition, net.minecraft.world.level.block.state.BlockState blockData, BlockEntity tileEntity) {
+@@ -126,7 +126,7 @@ public final class CraftBlockStates {
+         }
+     };
+     // Paper start
+-    private static final Map<BlockEntityType<?>, BlockStateFactory<?>> FACTORIES_BY_BLOCK_ENTITY_TYPE = new HashMap<>();
++    private static final Map<BlockEntityType<?>, BlockStateFactory<?>> FACTORIES_BY_BLOCK_ENTITY_TYPE = new java.util.IdentityHashMap<>(); // Leaf - Use optimized collections in CB classes
+     private static void register(BlockEntityType<?> type, BlockStateFactory<?> factory) {
+         FACTORIES_BY_BLOCK_ENTITY_TYPE.put(type, factory);
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/boss/CraftBossBar.java b/src/main/java/org/bukkit/craftbukkit/boss/CraftBossBar.java
+index a2e195f6f1d8b92e800ae3491f011ad07c984c44..ec03b05ddb05a4c5327707083cceb760a99a747d 100644
+--- a/src/main/java/org/bukkit/craftbukkit/boss/CraftBossBar.java
++++ b/src/main/java/org/bukkit/craftbukkit/boss/CraftBossBar.java
+@@ -47,7 +47,7 @@ public class CraftBossBar implements BossBar {
+     }
+ 
+     private void initialize() {
+-        this.flags = new HashMap<>();
++        this.flags = new java.util.EnumMap<>(BarFlag.class); // Leaf - Use optimized collections in craftbukkit classes
+         this.flags.put(BarFlag.DARKEN_SKY, new FlagContainer(handle::shouldDarkenScreen, handle::setDarkenScreen));
+         this.flags.put(BarFlag.PLAY_BOSS_MUSIC, new FlagContainer(handle::shouldPlayBossMusic, handle::setPlayBossMusic));
+         this.flags.put(BarFlag.CREATE_FOG, new FlagContainer(handle::shouldCreateWorldFog, handle::setCreateWorldFog));
+diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntityTypes.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntityTypes.java
+index f423bcee46506eccbaf61090adb886a31714c04d..74386f1aeb2962be22acaffe46e8c10c5158b279 100644
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftEntityTypes.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftEntityTypes.java
+@@ -261,8 +261,10 @@ public final class CraftEntityTypes {
+         }
+     };
+     // Paper end - respect randomizeData
+-    private static final Map<Class<?>, EntityTypeData<?, ?>> CLASS_TYPE_DATA = new HashMap<>();
+-    private static final Map<EntityType, EntityTypeData<?, ?>> ENTITY_TYPE_DATA = new HashMap<>();
++    // Leaf start - Use optimized collections in CB classes
++    private static final Map<Class<?>, EntityTypeData<?, ?>> CLASS_TYPE_DATA = new java.util.IdentityHashMap<>();
++    private static final Map<EntityType, EntityTypeData<?, ?>> ENTITY_TYPE_DATA = new java.util.EnumMap<>(EntityType.class);
++    // Leaf end - Use optimized collections in CB classes
+ 
+     static {
+         // Living
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/util/CraftInventoryCreator.java b/src/main/java/org/bukkit/craftbukkit/inventory/util/CraftInventoryCreator.java
+index 53cbc743b1e722d029021f9d63ffbf7d0fddd04e..0102e8933bd57c656d95a27606bdf4ef7df51d6f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/util/CraftInventoryCreator.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/util/CraftInventoryCreator.java
+@@ -11,7 +11,7 @@ public final class CraftInventoryCreator {
+     public static final CraftInventoryCreator INSTANCE = new CraftInventoryCreator();
+     //
+     private final CraftCustomInventoryConverter DEFAULT_CONVERTER = new CraftCustomInventoryConverter();
+-    private final Map<InventoryType, InventoryConverter> converterMap = new HashMap<>();
++    private final Map<InventoryType, InventoryConverter> converterMap = new java.util.EnumMap<>(InventoryType.class); // Leaf - Use optimized collections in CB classes
+ 
+     private CraftInventoryCreator() {
+         this.converterMap.put(InventoryType.CHEST, this.DEFAULT_CONVERTER);
+diff --git a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
+index d4012acbad76ef0389d176a01e42a4c27e1918bc..e5b6efc736da5b93be77c6a419f8d2800d336829 100644
+--- a/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
++++ b/src/main/java/org/bukkit/craftbukkit/util/CraftMagicNumbers.java
+@@ -152,10 +152,12 @@ public final class CraftMagicNumbers implements UnsafeValues {
+     }
+ 
+     // ========================================================================
+-    private static final Map<Block, Material> BLOCK_MATERIAL = new HashMap<>();
+-    private static final Map<Item, Material> ITEM_MATERIAL = new HashMap<>();
+-    private static final Map<Material, Item> MATERIAL_ITEM = new HashMap<>();
+-    private static final Map<Material, Block> MATERIAL_BLOCK = new HashMap<>();
++    // Leaf start - Use optimized collections in CB classes
++    private static final Map<Block, Material> BLOCK_MATERIAL = new java.util.IdentityHashMap<>();
++    private static final Map<Item, Material> ITEM_MATERIAL = new java.util.IdentityHashMap<>();
++    private static final Map<Material, Item> MATERIAL_ITEM = new java.util.EnumMap<>(Material.class);
++    private static final Map<Material, Block> MATERIAL_BLOCK = new java.util.EnumMap<>(Material.class);
++    // Leaf end - Use optimized collections in CB classes
+ 
+     static {
+         for (Block block : BuiltInRegistries.BLOCK) {
