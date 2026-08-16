@@ -1,0 +1,22 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:49:50 +0900
+Subject: [PATCH] optimize applyMovementEmissionAndPlaySound
+
+
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index a8ac8e4e953cdc00033efb652b4295be6fbfc3d8..0dcee613e817aa3af69d3fcd6573499acd0cb46a 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -1281,7 +1281,10 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         float f1 = (float)(movement.length() * 0.6F);
+         float f2 = (float)(movement.horizontalDistance() * 0.6F);
+         BlockPos onPos = this.getOnPos();
+-        BlockState blockState = this.level().getBlockState(onPos);
++        // Leaf start - optimize applyMovementEmissionAndPlaySound
++        BlockState blockState = this.level.getBlockStateIfLoaded(onPos);
++        if (blockState == null) { blockState = this.level().getBlockState(onPos); }
++        // Leaf end - optimize applyMovementEmissionAndPlaySound
+         boolean isStateClimbable = this.isStateClimbable(blockState);
+         this.moveDist += isStateClimbable ? f1 : f2;
+         this.flyDist += f1;

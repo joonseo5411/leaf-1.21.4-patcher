@@ -7,7 +7,7 @@
 ## minecraft-patches (118개)
 
 - [ ] Add-io_uring-support.patch
-- [ ] Better-checking-for-useless-move-packets.patch
+- [x] Better-checking-for-useless-move-packets.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (ServerEntity.java에 이미 적용됨)*
 - [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch — *범위 밖: 순수 최적화가 아닌 gameplay/네트워킹 가시성 수정(공격자가 근처 플레이어에게 트래킹 안 될 때 크리티컬 애니메이션이 안 보이는 문제) + 신규 config 필드 필요, 최적화 백포트 범위에서 제외*
 - [x] Cache-ShapePairKey-hash.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Block.ShapePairKey에 hash 필드 이미 존재)*
 - [x] Cache-block-state-tags.patch
@@ -38,7 +38,7 @@
 - [x] Optimize-matching-item-checks.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ItemStack.java isSameItem/isSameItemSameComponents에 stack == other 조기 return 이미 존재)*
 - [x] Optimize-noise-generation.patch — *포팅 불필요: 이미 Gale/C2ME 기반에 포함되어 있음 (ImprovedNoise.java FLAT_SIMPLEX_GRAD 이미 존재)*
 - [x] Optimize-pushable-selector.patch
-- [ ] Optimize-random-calls-in-chunk-ticking.patch
+- [x] Optimize-random-calls-in-chunk-ticking.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (LevelChunk.java에 shouldDoLightning 이미 존재)*
 - [x] Optimize-respawn-anchor-explosion.patch — *포팅 완료. getFluidStateIfLoadedUnchecked 헬퍼가 1.21.4엔 없지만 동일 역할의 기존 Level#getFluidIfLoaded(BlockPos)로 대체 적용, stream 제거*
 - [x] Optimize-sheep-offspring-color.patch — *포팅 불필요: 이미 Gale/carpet-fixes 기반에 포함되어 있음 (DyeColor.getMixedColor 이미 최적화됨)*
 - [x] Optimize-sun-burn-tick.patch — *포팅 불필요: 이미 Gale/JettPack 기반에 포함되어 있음 (Entity.isSunBurnTick 이미 캐싱 적용됨)*
@@ -48,7 +48,7 @@
 - [x] Pluto-don-t-load-chunks-to-spread-grass.patch — *포팅 완료. getChunkAtIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getChunkIfLoaded(int,int)로 대체*
 - [x] Pluto-reduce-allocation.patch — *포팅 완료 (WireHandler UpdateOrder.values() 캐싱, SpawnPlacementTypes 중복 BlockPos 로컬 제거)*
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
-- [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch
+- [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch — *보류: 8개 파일(ServerLevel + 여러 투사체 클래스) 변경 필요, 청크 상태 게이팅을 잘못 적용하면 투사체 동작 자체가 깨질 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] Prevent-entities-random-strolling-into-non-ticking-c.patch — *포팅 불필요: 이미 Gale/MultiPaper 기반에 포함되어 있음*
 - [x] Reduce-AbstractContainerMenu-allocations.patch
 - [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
@@ -75,7 +75,7 @@
 - [x] Replace-division-by-multiplication-in-CubePointRange.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (CubePointRange.java에 scale 필드 이미 존재)*
 - [ ] Replace-entity-equipment-items-to-array.patch
 - [x] Replace-parts-by-size-in-CubePointRange.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (CubePointRange.java에 size 필드 이미 존재)*
-- [ ] Replace-throttle-tracker-map-with-optimized-collecti.patch
+- [x] Replace-throttle-tracker-map-with-optimized-collecti.patch — *포팅 불필요: 이미 Gale/Dionysus 기반에 포함되어 있음 (ServerHandshakePacketListenerImpl.java에 이미 적용됨)*
 - [ ] Rewrite-entity-despawn-time.patch
 - [ ] SIMD-support.patch
 - [x] Send-multiple-keep-alive-packets.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음*
@@ -92,7 +92,7 @@
 - [ ] Spread-out-sending-all-player-info.patch
 - [x] Store-mob-counts-in-an-array.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (LocalMobCapCalculator.java에 int[] counts 이미 존재)*
 - [x] Update-boss-bar-within-tick.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (Raid.java에 isBarDirty 필드 이미 존재)*
-- [ ] Use-linked-map-for-entity-trackers.patch
+- [x] Use-linked-map-for-entity-trackers.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (ChunkMap.java entityMap이 이미 Int2ObjectLinkedOpenHashMap)*
 - [x] Variable-entity-wake-up-duration.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ActivationRange.java에 entityWakeUpDurationRatioStandardDeviation 로직 이미 존재)*
 - [ ] Virtual-thread-support-for-chat-executor.patch
 - [ ] Virtual-thread-support-for-download-pool.patch
@@ -103,9 +103,9 @@
 - [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
 - [x] optimize-LevelChunk-getBlockStateFinal.patch
 - [x] optimize-PalettedContainer-get.patch
-- [ ] optimize-PathNavigation-followThePath.patch
+- [x] optimize-PathNavigation-followThePath.patch — *포팅 완료 (Path#getNextNode() 직접 사용으로 getNextNodePos()의 Vec3i 할당 회피)*
 - [x] optimize-SimpleBitStorage-object-layout.patch
-- [ ] optimize-applyMovementEmissionAndPlaySound.patch
+- [x] optimize-applyMovementEmissionAndPlaySound.patch — *포팅 완료. getBlockStateIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getBlockStateIfLoaded(BlockPos)로 대체*
 - [ ] optimize-attribute.patch
 - [x] optimize-canHoldAnyFluid.patch
 - [ ] optimize-checkInsideBlocks-calls.patch
@@ -115,14 +115,14 @@
 - [x] optimize-getOnPos.patch
 - [ ] optimize-goal-selector.patch
 - [x] optimize-isStateClimbable.patch
-- [ ] optimize-mob-despawn.patch
+- [ ] optimize-mob-despawn.patch — *보류: 신규 KDTree3D 유틸리티 + 신규 config 모듈(OptimizeDespawn) + Mob 디스폰 로직 전체 재구현(entity.checkDespawn()을 우회) 필요. 버그 시 테임된/네임태그 붙은 몹이 잘못 디스폰될 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] optimize-movement-vector-normalization.patch — *포팅 불필요: 1.21.4의 Entity#checkFallDamage엔 이 최적화 대상인 8블록 clamp/normalize 로직 자체가 없음(더 최신 MC 버전에서 추가된 로직)*
 - [ ] optimize-no-action-time.patch
 - [x] optimize-tickEffects.patch — *포팅 완료(1.21.4엔 ServerLevel 분기가 없는 더 단순한 구조라 그 구조에 맞춰 empty-check 가드만 적용)*
 - [x] optimize-waypoint.patch — *포팅 불필요: 1.21.4엔 Waypoint(로케이터 바) 기능 자체가 없음(WaypointTransmitter 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] reduce-enchantment-allocations.patch
 - [ ] remove-shouldTickBlocksAt-check.patch — *포팅 비권장: upstream 커밋 사유가 "BoundTickingBlockEntity#tick에 중복 체크 존재"인데 1.21.4엔 BoundTickingBlockEntity 클래스 자체가 없어 전제가 성립하지 않음*
-- [ ] rewrite-InsideBrownianWalk.patch
+- [x] rewrite-InsideBrownianWalk.patch — *포팅 불필요: 이미 Leaf 자체 최적화("Remove streams on InsideBrownianWalk")로 stream 제거 + 수동 루프 적용됨. 남은 차이(BlockAreaUtils 배열 + Fisher-Yates vs 현재의 ArrayList + Collections.shuffle)는 미미한 추가 이득이라 스킵*
 - [ ] thread-unsafe-chunk-map.patch
 
 ## paper-patches (15개)
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 83 / 138 체크됨** (실제 포팅 30개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 90 / 138 체크됨** (실제 포팅 32개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 12**: `optimize-applyMovementEmissionAndPlaySound`(getBlockStateIfLoadedUnchecked 미존재로 기존 Level#getBlockStateIfLoaded로 대체), `optimize-PathNavigation-followThePath`(Path#getNextNode() 직접 사용으로 getNextNodePos()의 Vec3i 할당 회피)를 포팅. 나머지 후보 중 5개는 이미 Gale/Airplane/Dionysus/VMP 기반에 구현되어 있었고(Better-checking-for-useless-move-packets, Optimize-random-calls-in-chunk-ticking, Use-linked-map-for-entity-trackers, Replace-throttle-tracker-map), rewrite-InsideBrownianWalk는 이미 Leaf 자체 stream 제거 최적화로 커버되어 있어 불필요, optimize-mob-despawn은 신규 KDTree3D 유틸+config 모듈+디스폰 로직 전체 재구현이 필요하고 버그 시 테임/네임태그 몹이 잘못 디스폰될 리스크가 있어 보류, Prevent-entities-from-moving-into-weak-loaded-chunks는 8개 파일(투사체 클래스 다수 포함) 규모라 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증, 예외 0건.
 
 **Batch 11**: `optimize-tickEffects`(1.21.4의 더 단순한 구조에 맞춰 empty-check 가드 적용), `Pluto-reduce-allocation`(WireHandler UpdateOrder.values() 캐싱 + SpawnPlacementTypes 중복 BlockPos 제거), `Pluto-don-t-load-chunks-to-spread-grass`(getChunkAtIfLoadedUnchecked 미존재로 기존 Level#getChunkIfLoaded로 대체), `Filter-ClientboundSetEntityMotionPacket`(기존 ReduceUselessPackets config 모듈에 필드 추가, 기본값 false), `Optimize-respawn-anchor-explosion`(getFluidStateIfLoadedUnchecked 미존재로 기존 Level#getFluidIfLoaded로 대체), `optimize-collidedAlongVector`(1.21.4는 entity-inside-block 충돌 코드가 구버전 구조라 호출부 1곳에만 적용)를 포팅. 첫 컴파일 시도에서 2개 컴파일 에러 발견 후 수정: (1) `net.minecraft.world.entity.animal.squid.Squid` → 1.21.4엔 `net.minecraft.world.entity.animal.Squid`(서브패키지 없음), (2) `Direction.Plane.HORIZONTAL.faces`가 1.21.4에선 private 필드라 `Plane`이 구현하는 `Iterable<Direction>` 인터페이스로 순회하도록 수정. 나머지 후보 중 6개는 이미 Gale/MultiPaper 기반에 구현되어 있었고(Don-t-load-chunks-to-spawn-phantoms, Optimize-matching-item-checks), 2개는 해당 기능/코드 자체가 1.21.4에 없어 불필요(optimize-movement-vector-normalization: 8블록 clamp 로직 부재, optimize-waypoint: Waypoint 기능 자체 부재), Broadcast-crit-animations는 순수 최적화가 아닌 gameplay 수정이라 범위 밖으로 판단, optimize-collision-shape와 Pluto-Expose-Direction-Plane-s-faces는 리스크/규모 문제로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증(컴파일 에러 수정 후 재테스트, 예외 0건).
 
