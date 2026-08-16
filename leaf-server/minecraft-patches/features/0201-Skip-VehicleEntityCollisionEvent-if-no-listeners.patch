@@ -1,0 +1,143 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:08:12 +0900
+Subject: [PATCH] Skip VehicleEntityCollisionEvent if no listeners
+
+Guard all 8 VehicleEntityCollisionEvent construction sites across
+boat/minecart collision and pickup/push logic behind a registered-
+listener check, avoiding event object allocation when nothing is
+listening.
+
+Backported from Leaf ver/26.2 (original author: OverwriteMC) to
+ver/1.21.4. File layout differs slightly (AbstractMinecart.java and
+the minecart behavior classes live directly under world/entity/vehicle/
+here, not vehicle/minecart/), otherwise all call sites matched
+upstream exactly.
+
+diff --git a/net/minecraft/world/entity/vehicle/AbstractBoat.java b/net/minecraft/world/entity/vehicle/AbstractBoat.java
+index b1b312e45ed4514eaa6fb3941af64b641220c5bd..a24653c0892f53979ce1f2f693f48d7da9f3fe12 100644
+--- a/net/minecraft/world/entity/vehicle/AbstractBoat.java
++++ b/net/minecraft/world/entity/vehicle/AbstractBoat.java
+@@ -190,7 +190,7 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
+         if (entity instanceof AbstractBoat) {
+             if (entity.getBoundingBox().minY < this.getBoundingBox().maxY) {
+                 // CraftBukkit start
+-                if (!this.isPassengerOfSameVehicle(entity)) {
++                if (!this.isPassengerOfSameVehicle(entity) && org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     org.bukkit.event.vehicle.VehicleEntityCollisionEvent event = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                         (org.bukkit.entity.Vehicle) this.getBukkitEntity(),
+                         entity.getBukkitEntity()
+@@ -202,7 +202,7 @@ public abstract class AbstractBoat extends VehicleEntity implements Leashable {
+             }
+         } else if (entity.getBoundingBox().minY <= this.getBoundingBox().minY) {
+             // CraftBukkit start
+-            if (!this.isPassengerOfSameVehicle(entity)) {
++            if (!this.isPassengerOfSameVehicle(entity) && org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                 org.bukkit.event.vehicle.VehicleEntityCollisionEvent event = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                     (org.bukkit.entity.Vehicle) this.getBukkitEntity(),
+                     entity.getBukkitEntity()
+diff --git a/net/minecraft/world/entity/vehicle/AbstractMinecart.java b/net/minecraft/world/entity/vehicle/AbstractMinecart.java
+index 1d0ceeea36b7b09766237e160fa1f88e2ffc484c..bbe3f37ece421a7e324f059aca3ae313bc7d5be9 100644
+--- a/net/minecraft/world/entity/vehicle/AbstractMinecart.java
++++ b/net/minecraft/world/entity/vehicle/AbstractMinecart.java
+@@ -160,6 +160,7 @@ public abstract class AbstractMinecart extends VehicleEntity {
+             return false;
+         }
+ 
++        if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length == 0) return true; // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+         org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent((org.bukkit.entity.Vehicle) getBukkitEntity(), entity.getBukkitEntity());
+         return collisionEvent.callEvent();
+         // Paper end - fix VehicleEntityCollisionEvent not called when colliding with player
+@@ -612,11 +613,13 @@ public abstract class AbstractMinecart extends VehicleEntity {
+                 if (!this.level().paperConfig().collisions.allowVehicleCollisions && this.level().paperConfig().collisions.onlyPlayersCollide && !(entity instanceof Player)) return; // Paper - Collision option for requiring a player participant
+                 if (!this.hasPassenger(entity)) {
+                     // CraftBukkit start
++                    if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                         (org.bukkit.entity.Vehicle) this.getBukkitEntity(),
+                         entity.getBukkitEntity()
+                     );
+                     if (!collisionEvent.callEvent()) return;
++                    } // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     // CraftBukkit end
+                     double d = entity.getX() - this.getX();
+                     double d1 = entity.getZ() - this.getZ();
+diff --git a/net/minecraft/world/entity/vehicle/NewMinecartBehavior.java b/net/minecraft/world/entity/vehicle/NewMinecartBehavior.java
+index 4426b344677ab9f2753dd2d219921bcb7cf39980..a8d64275a0a4286835701f2f5d4f33bb67facf96 100644
+--- a/net/minecraft/world/entity/vehicle/NewMinecartBehavior.java
++++ b/net/minecraft/world/entity/vehicle/NewMinecartBehavior.java
+@@ -533,11 +533,13 @@ public class NewMinecartBehavior extends MinecartBehavior {
+                         && !this.minecart.isVehicle()
+                         && !entity.isPassenger()) {
+                         // CraftBukkit start
++                        if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                         org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                             (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(),
+                             entity.getBukkitEntity()
+                         );
+                         if (!collisionEvent.callEvent()) continue;
++                        } // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                         // CraftBukkit end
+                         boolean flag = entity.startRiding(this.minecart);
+                         if (flag) {
+@@ -563,7 +565,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
+                         || this.minecart.isVehicle()
+                         || entity.isPassenger()) {
+                         // CraftBukkit start
+-                        if (!this.minecart.isPassengerOfSameVehicle(entity)) {
++                        if (!this.minecart.isPassengerOfSameVehicle(entity) && org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                             org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                                 (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(),
+                                 entity.getBukkitEntity()
+@@ -582,6 +584,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
+             for (Entity entity1 : this.level().getEntities(this.minecart, box)) {
+                 if (!this.minecart.hasPassenger(entity1) && entity1.isPushable() && entity1 instanceof AbstractMinecart) {
+                     // CraftBukkit start
++                    if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                         (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(),
+                         entity1.getBukkitEntity()
+@@ -589,6 +592,7 @@ public class NewMinecartBehavior extends MinecartBehavior {
+                     if (!collisionEvent.callEvent()) {
+                         continue;
+                     }
++                    } // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     // CraftBukkit end
+                     entity1.push(this.minecart);
+                     flag = true;
+diff --git a/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java b/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java
+index 8d1b70e526892860cc286314642fe51e5a44d7dc..86a718b4c3bb40c6f6dae14b9c44e8afe6987591 100644
+--- a/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java
++++ b/net/minecraft/world/entity/vehicle/OldMinecartBehavior.java
+@@ -415,15 +415,17 @@ public class OldMinecartBehavior extends MinecartBehavior {
+                         && !this.minecart.isVehicle()
+                         && !entity.isPassenger()) {
+                         // CraftBukkit start
++                        if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                         org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                             (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(), entity.getBukkitEntity()
+                         );
+                         if (!collisionEvent.callEvent()) continue;
++                        } // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                         // CraftBukkit end
+                         entity.startRiding(this.minecart);
+                     } else {
+                         // CraftBukkit start
+-                        if (!this.minecart.isPassengerOfSameVehicle(entity)) {
++                        if (!this.minecart.isPassengerOfSameVehicle(entity) && org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                             org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                                 (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(), entity.getBukkitEntity()
+                             );
+@@ -438,10 +440,12 @@ public class OldMinecartBehavior extends MinecartBehavior {
+             for (Entity entity1 : this.level().getEntities(this.minecart, aabb)) {
+                 if (!this.minecart.hasPassenger(entity1) && entity1.isPushable() && entity1 instanceof AbstractMinecart) {
+                     // CraftBukkit start
++                    if (org.bukkit.event.vehicle.VehicleEntityCollisionEvent.getHandlerList().getRegisteredListeners().length > 0) { // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     org.bukkit.event.vehicle.VehicleEntityCollisionEvent collisionEvent = new org.bukkit.event.vehicle.VehicleEntityCollisionEvent(
+                         (org.bukkit.entity.Vehicle) this.minecart.getBukkitEntity(), entity1.getBukkitEntity()
+                     );
+                     if (!collisionEvent.callEvent()) continue;
++                    } // Leaf - Skip VehicleEntityCollisionEvent if no listeners
+                     // CraftBukkit end
+                     entity1.push(this.minecart);
+                 }

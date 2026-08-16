@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:08:12 +0900
+Subject: [PATCH] Skip PreCreatureSpawnEvent if no listeners
+
+Backported from Leaf ver/26.2 (original author: Taiyou06) to
+ver/1.21.4. Upstream touches two isValidSpawnPositionForType overloads
+(per-player spawning split); 1.21.4 only has the single-method form,
+so only that one call site needed the guard.
+
+diff --git a/net/minecraft/world/level/NaturalSpawner.java b/net/minecraft/world/level/NaturalSpawner.java
+index 840af74969b6ec33a0db61e83c65a570d8258126..2d08cead81f146ef12b454e5fe0c83d31fa46ae9 100644
+--- a/net/minecraft/world/level/NaturalSpawner.java
++++ b/net/minecraft/world/level/NaturalSpawner.java
+@@ -496,6 +496,8 @@ public final class NaturalSpawner {
+         EntityType<?> entityType = data.type;
+ 
+         // Paper start - PreCreatureSpawnEvent
++        // Leaf start - Skip PreCreatureSpawnEvent if no listeners
++        if (com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent.getHandlerList().getRegisteredListeners().length != 0) {
+         com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent event = new com.destroystokyo.paper.event.entity.PreCreatureSpawnEvent(
+             io.papermc.paper.util.MCUtil.toLocation(level, pos),
+             org.bukkit.craftbukkit.entity.CraftEntityType.minecraftToBukkit(entityType), SpawnReason.NATURAL
+@@ -506,6 +508,8 @@ public final class NaturalSpawner {
+             }
+             return PreSpawnStatus.CANCELLED;
+         }
++        }
++        // Leaf end - Skip PreCreatureSpawnEvent if no listeners
+         final boolean success = entityType.getCategory() != MobCategory.MISC
+             // Paper end - PreCreatureSpawnEvent
+             && (

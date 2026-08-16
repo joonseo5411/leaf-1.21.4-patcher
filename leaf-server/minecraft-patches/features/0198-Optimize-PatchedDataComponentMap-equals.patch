@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:05:16 +0900
+Subject: [PATCH] Optimize PatchedDataComponentMap equals
+
+The server frequently compares item states via broadcastChanges()
+during player ticks. Fail fast by comparing patch size first, and
+check reference equality of the patch maps before falling back to a
+full equals() (effective due to the COW mechanism where many
+unmodified ItemStacks share the same patch map instance).
+
+Backported from Leaf ver/26.2 (original author: HaHaWTH) to ver/1.21.4.
+
+diff --git a/net/minecraft/core/component/PatchedDataComponentMap.java b/net/minecraft/core/component/PatchedDataComponentMap.java
+index a8c6549f772208cd543607224fef2c2389b14f24..3a5930c783e9d9008b7929e13b7e7f2c2c4a0cb6 100644
+--- a/net/minecraft/core/component/PatchedDataComponentMap.java
++++ b/net/minecraft/core/component/PatchedDataComponentMap.java
+@@ -223,10 +223,18 @@ public final class PatchedDataComponentMap implements DataComponentMap {
+ 
+     @Override
+     public boolean equals(Object other) {
+-        return this == other
+-            || other instanceof PatchedDataComponentMap patchedDataComponentMap
+-                && this.prototype.equals(patchedDataComponentMap.prototype)
+-                && this.patch.equals(patchedDataComponentMap.patch);
++        // Leaf start - Optimize PatchedDataComponentMap equals
++        if (this == other) return true;
++        if (!(other instanceof PatchedDataComponentMap patchedDataComponentMap)) return false;
++        if (this.patch.size() != patchedDataComponentMap.patch.size()) {
++            return false;
++        }
++        if (!this.prototype.equals(patchedDataComponentMap.prototype)) {
++            return false;
++        }
++        if (this.patch == patchedDataComponentMap.patch) return true;
++        return this.patch.equals(patchedDataComponentMap.patch);
++        // Leaf end - Optimize PatchedDataComponentMap equals
+     }
+ 
+     @Override
