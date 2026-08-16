@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:29:25 +0900
+Subject: [PATCH] Only update frozen ticks if changed; Optimise getEntities
+ (isAlive reorder)
+
+- Skip the setTicksFrozen() write (and its downstream sync/marking)
+  when the computed value hasn't actually changed. 1.21.4's freeze
+  tick logic differs structurally from ver/26.2 (both branches share
+  one code path here instead of being split out), so this was adapted
+  to that shape rather than copied verbatim.
+- isAlive(): check the cheapest field read (this.dead) first, before
+  the more expensive isRemoved()/getHealth() calls, matching
+  ver/26.2's Optimise-getEntities patch.
+
+Backported from Leaf ver/26.2 (original authors: hayanesuru, Taiyou06)
+to ver/1.21.4.
+
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index b88352f5bd44588e6b4ec7dfbffba71f1bb0796e..64be21e794ed8622ca4c0bce0b4f9c7f91b9e273 100644
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -2184,7 +2184,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+ 
+     @Override
+     public boolean isAlive() {
+-        return !this.isRemoved() && this.getHealth() > 0.0F && !this.dead; // Paper - Check this.dead
++        return !this.dead && !this.isRemoved() && this.getHealth() > 0.0F; // Paper - Check this.dead // Leaf - Optimise getEntities - check the cheapest first
+     }
+ 
+     public boolean isLookingAtMe(LivingEntity entity, double tolerance, boolean scaleByDistance, boolean visual, double... yValues) {
+@@ -3604,9 +3604,11 @@ public abstract class LivingEntity extends Entity implements Attackable {
+         if (!this.level().isClientSide && !this.isDeadOrDying() && !this.freezeLocked) { // Paper - Freeze Tick Lock API
+             int ticksFrozen = this.getTicksFrozen();
+             if (this.isInPowderSnow && this.canFreeze()) {
+-                this.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), ticksFrozen + 1));
++                int newTicksFrozen = Math.min(this.getTicksRequiredToFreeze(), ticksFrozen + 1); // Leaf - Only update frozen ticks if changed
++                if (ticksFrozen != newTicksFrozen) this.setTicksFrozen(newTicksFrozen); // Leaf - Only update frozen ticks if changed
+             } else {
+-                this.setTicksFrozen(Math.max(0, ticksFrozen - 2));
++                int newTicksFrozen = Math.max(0, ticksFrozen - 2); // Leaf - Only update frozen ticks if changed
++                if (ticksFrozen != newTicksFrozen) this.setTicksFrozen(newTicksFrozen); // Leaf - Only update frozen ticks if changed
+             }
+         }
+ 

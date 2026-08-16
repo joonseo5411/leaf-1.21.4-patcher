@@ -1,0 +1,41 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:29:25 +0900
+Subject: [PATCH] Don't load POI for competitor scan
+
+Use a non-loading POI lookup (getTypeIfLoaded) for the periodic
+job-site competitor scan behavior, since forcing a chunk load here
+just to compare job sites is wasteful.
+
+Backported from Leaf ver/26.2 (original author: HaHaWTH) to ver/1.21.4.
+
+diff --git a/net/minecraft/world/entity/ai/behavior/PoiCompetitorScan.java b/net/minecraft/world/entity/ai/behavior/PoiCompetitorScan.java
+index b11a16db0ea22ebd68db9c96e0ba0939b6596caf..4e4258ec3a6ad6c4f5c7d855dd6f767469d88324 100644
+--- a/net/minecraft/world/entity/ai/behavior/PoiCompetitorScan.java
++++ b/net/minecraft/world/entity/ai/behavior/PoiCompetitorScan.java
+@@ -20,7 +20,7 @@ public class PoiCompetitorScan {
+                     (jobSite, nearestLivingEntities) -> (level, villager, gameTime) -> {
+                         GlobalPos globalPos = instance.get(jobSite);
+                         level.getPoiManager()
+-                            .getType(globalPos.pos())
++                            .getTypeIfLoaded(globalPos.pos()) // Leaf - Don't load POI for competitor scan
+                             .ifPresent(
+                                 // Paper start - Improve performance of PoiCompetitorScan by unrolling stream
+                                 // The previous logic used Stream#reduce to simulate a form of single-iteration bubble sort
+diff --git a/net/minecraft/world/entity/ai/village/poi/PoiManager.java b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
+index 618fc0eb4fe70e46e55f3aa28e8eac1d2d01b6d9..9319081757219a29be507de0fb90fc909f9d6c5a 100644
+--- a/net/minecraft/world/entity/ai/village/poi/PoiManager.java
++++ b/net/minecraft/world/entity/ai/village/poi/PoiManager.java
+@@ -340,6 +340,12 @@ public class PoiManager extends SectionStorage<PoiSection, PoiSection.Packed> im
+         return this.getOrLoad(SectionPos.asLong(pos)).flatMap(poiSection -> poiSection.getType(pos));
+     }
+ 
++    // Leaf start - Don't load POI for competitor scan
++    public Optional<Holder<PoiType>> getTypeIfLoaded(BlockPos pos) {
++        return this.get(SectionPos.asLong(pos)).flatMap(poiSection -> poiSection.getType(pos));
++    }
++    // Leaf end - Don't load POI for competitor scan
++
+     @Deprecated
+     @VisibleForDebug
+     public int getFreeTickets(BlockPos pos) {

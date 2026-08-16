@@ -9,14 +9,14 @@
 - [ ] Add-io_uring-support.patch
 - [ ] Better-checking-for-useless-move-packets.patch
 - [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch
-- [ ] Cache-ShapePairKey-hash.patch
+- [x] Cache-ShapePairKey-hash.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Block.ShapePairKey에 hash 필드 이미 존재)*
 - [ ] Cache-block-state-tags.patch
 - [x] Cache-identifier-toString-and-hash.patch
 - [x] Cache-world-border.patch — *포팅 불필요: 1.21.4 vanilla/Paper already caches it as a direct field (Level.java), so this patch does not apply*
 - [ ] Cache-world-generator-sea-level.patch
 - [ ] Check-frozen-ticks-before-landing-block.patch
 - [ ] Check-targeting-range-before-getting-visibility.patch
-- [ ] Don-t-load-POI-for-competitor-scan.patch
+- [x] Don-t-load-POI-for-competitor-scan.patch
 - [ ] Don-t-load-chunks-to-spawn-phantoms.patch
 - [x] Faster-floating-point-positive-modulo.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Mth.java positiveModuloForPositiveIntegerDenominator 등 이미 존재)*
 - [ ] Filter-ClientboundSetEntityMotionPacket.patch
@@ -29,8 +29,8 @@
 - [ ] Luminol-Configurable-region-format-framework.patch
 - [ ] Make-EntityCollisionContext-a-live-representation.patch
 - [x] Move-random-tick-random.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (Level.java에 simpleRandom 필드 이미 존재)*
-- [ ] Only-update-frozen-ticks-if-changed.patch
-- [ ] Optimise-getEntities.patch
+- [x] Only-update-frozen-ticks-if-changed.patch
+- [x] Optimise-getEntities.patch
 - [x] Optimize-PatchedDataComponentMap-equals.patch
 - [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
 - [x] Optimize-Vec3i-hashing.patch
@@ -54,7 +54,7 @@
 - [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
 - [ ] Reduce-array-allocations.patch
 - [ ] Reduce-block-destruction-packet-allocations.patch
-- [ ] Reduce-debug-subscribers-overhead.patch
+- [x] Reduce-debug-subscribers-overhead.patch — *포팅 불필요: 1.21.4엔 debug subscribers 기능 자체가 없음 (ServerDebugSubscribers.java 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] Reduce-enderman-teleport-chunk-lookups.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (EnderMan.teleport 이미 single chunk lookup 적용됨)*
 - [ ] Reduce-in-wall-checks.patch
 - [ ] Reduce-lambda-and-Optional-allocation-in-EntityBased.patch
@@ -151,7 +151,7 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 24 / 138 체크됨** (고유 패치 기준 20개: 실제 포팅 9개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations / 이미 각종 서드파티 포크(Gale·Patina·Airplane·Pufferfish·JettPack·carpet-fixes·VMP·Lithium·Mirai) 기반에 구현되어 있어 포팅 불필요로 확인 11개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags(코어 블록 상태 시스템 광범위 변경), Optimize-respawn-anchor-explosion(1.21.4에 없는 getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(1.21.4에 없는 Leaf config 모듈 + Leaves ServerPhotographer 클래스 전제)
+**진행률: 29 / 138 체크됨** (고유 패치 기준 25개: 실제 포팅 12개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations, Don't load POI for competitor scan, Only update frozen ticks if changed, Optimise getEntities(isAlive reorder + ChunkEntitySlices hot loop) / 이미 각종 서드파티 포크(Gale·Patina·Airplane·Pufferfish·JettPack·carpet-fixes·VMP·Lithium·Mirai) 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인 13개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags(코어 블록 상태 시스템 광범위 변경), Optimize-respawn-anchor-explosion(1.21.4에 없는 getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(1.21.4에 없는 Leaf config 모듈 + Leaves ServerPhotographer 클래스 전제)
 
 ## 포팅 절차 (참고)
 
