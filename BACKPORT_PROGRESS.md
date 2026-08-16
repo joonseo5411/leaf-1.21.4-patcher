@@ -6,7 +6,7 @@
 
 ## minecraft-patches (118개)
 
-- [ ] Add-io_uring-support.patch
+- [ ] Add-io_uring-support.patch — *보류: 대상 클래스 io/netty 채널 선택 추상화(EventLoopGroupHolder.java)가 1.21.4엔 없음 — 1.21.4는 ServerConnectionListener.java 안에서 NIO/Epoll만 직접 분기하는 더 단순한 구조라 io_uring을 붙이려면 핵심 네트워크 부트스트랩 코드를 직접 건드려야 함(전체 접속 수락 로직 리스크). netty-incubator-transport-native-io_uring:0.0.26.Final 의존성(linux-x86_64/aarch_64 클래시파이어 확인됨)까지는 준비했으나 실제 코드 포팅은 리스크 대비 이득이 낮아 보류, 전용 세션 권장*
 - [x] Better-checking-for-useless-move-packets.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (ServerEntity.java에 이미 적용됨)*
 - [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch — *범위 밖: 순수 최적화가 아닌 gameplay/네트워킹 가시성 수정(공격자가 근처 플레이어에게 트래킹 안 될 때 크리티컬 애니메이션이 안 보이는 문제) + 신규 config 필드 필요, 최적화 백포트 범위에서 제외*
 - [x] Cache-ShapePairKey-hash.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Block.ShapePairKey에 hash 필드 이미 존재)*
@@ -26,7 +26,7 @@
 - [x] Lithium-combined-heightmap-update.patch — *포팅 완료. 신규 유틸리티 클래스 net.caffeinemc.mods.lithium.common.world.chunk.heightmap.CombinedHeightmapUpdate 추가(4개 heightmap을 한 번의 top-down 스캔으로 동시 갱신), Heightmap.java에 isOpaque()/setHeight() public 접근자 추가*
 - [x] Lithium-equipment-tracking.patch — *포팅 불가: 핵심 로직이 EntityEquipment.java(535줄 중 대부분)를 대상으로 하는데 1.21.4엔 그 클래스 자체가 없음 (Replace-entity-equipment-items-to-array와 동일 사유)*
 - [ ] Lithium-faster-hash-palette.patch — *보류: 신규 LithiumHashPalette 전체 구현체(오픈 어드레싱 해시 기반 팔레트) 필요, 청크 블록 저장 압축 알고리즘이라 버그 시 월드 데이터 손상 리스크, 전용 세션에서 신중히 검증 권장*
-- [ ] Luminol-Configurable-region-format-framework.patch
+- [ ] Luminol-Configurable-region-format-framework.patch — *보류: 월드 저장 파일 포맷 자체(리전 파일 I/O)를 교체 가능하게 만드는 초고위험 인프라 변경(Linear V2 등 대체 포맷 라이브러리 전체 필요), 월드 손상 리스크 매우 큼. 순수 최적화 백포트 범위를 넘어서는 별도 프로젝트급 작업으로 판단, 진행 안 함*
 - [x] Make-EntityCollisionContext-a-live-representation.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [x] Move-random-tick-random.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (Level.java에 simpleRandom 필드 이미 존재)*
 - [x] Only-update-frozen-ticks-if-changed.patch
@@ -42,8 +42,8 @@
 - [x] Optimize-respawn-anchor-explosion.patch — *포팅 완료. getFluidStateIfLoadedUnchecked 헬퍼가 1.21.4엔 없지만 동일 역할의 기존 Level#getFluidIfLoaded(BlockPos)로 대체 적용, stream 제거*
 - [x] Optimize-sheep-offspring-color.patch — *포팅 불필요: 이미 Gale/carpet-fixes 기반에 포함되어 있음 (DyeColor.getMixedColor 이미 최적화됨)*
 - [x] Optimize-sun-burn-tick.patch — *포팅 불필요: 이미 Gale/JettPack 기반에 포함되어 있음 (Entity.isSunBurnTick 이미 캐싱 적용됨)*
-- [ ] Paper-PR-Optimise-temptation-lookups-changes.patch
-- [ ] Paper-PR-Optimise-temptation-lookups.patch
+- [ ] Paper-PR-Optimise-temptation-lookups-changes.patch — *보류: 아래 항목과 함께 처리, 전용 세션 권장*
+- [ ] Paper-PR-Optimise-temptation-lookups.patch — *보류: 33개 이상 파일(거의 모든 동물 몹 AI 클래스 + 신규 GlobalTemptationLookup 클래스)에 걸친 대규모 리라이트, 전용 세션 권장*
 - [ ] Pluto-Expose-Direction-Plane-s-faces.patch — *보류: 692줄 대규모 변경, 전용 세션에서 처리 권장*
 - [x] Pluto-don-t-load-chunks-to-spread-grass.patch — *포팅 완료. getChunkAtIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getChunkIfLoaded(int,int)로 대체*
 - [x] Pluto-reduce-allocation.patch — *포팅 완료 (WireHandler UpdateOrder.values() 캐싱, SpawnPlacementTypes 중복 BlockPos 로컬 제거)*
@@ -71,12 +71,12 @@
 - [x] Remove-stream-on-PlayerDetector.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Remove-stream-on-updateConnectedPlayersWithinRange.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Replace-EntitySelectorOptions-map-with-optimized-col.patch
-- [ ] Replace-brain-with-optimized-collection.patch
+- [ ] Replace-brain-with-optimized-collection.patch — *보류: 신규 커스텀 컬렉션 3종(BehaviorControlArraySet/ActivityArrayMap/ActivityBitSet) 전체 구현 필요, Brain은 마을 사람/피글린 등 전체 몹 AI의 핵심 저장소라 버그 리스크 큼, 전용 세션 권장*
 - [x] Replace-division-by-multiplication-in-CubePointRange.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (CubePointRange.java에 scale 필드 이미 존재)*
 - [x] Replace-entity-equipment-items-to-array.patch — *포팅 불필요: 1.21.4엔 EntityEquipment 클래스 자체가 없음(장비를 별도 Map으로 관리하는 상위 버전의 리팩터링 이전 구조, 이미 Remove-iterators-from-Inventory 조사에서 동일하게 확인됨)*
 - [x] Replace-parts-by-size-in-CubePointRange.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (CubePointRange.java에 size 필드 이미 존재)*
 - [x] Replace-throttle-tracker-map-with-optimized-collecti.patch — *포팅 불필요: 이미 Gale/Dionysus 기반에 포함되어 있음 (ServerHandshakePacketListenerImpl.java에 이미 적용됨)*
-- [ ] Rewrite-entity-despawn-time.patch
+- [ ] Rewrite-entity-despawn-time.patch — *보류: 엔티티 생명주기+청크시스템 광범위 변경, 전용 세션 권장*
 - [ ] SIMD-support.patch
 - [x] Send-multiple-keep-alive-packets.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음*
 - [x] Skip-BlockPhysicsEvent-if-no-listeners.patch — *포팅 완료(1.21.4는 원본과 달리 cworld != null 체크가 추가로 있어 두 조건을 함께 사용)*
@@ -85,11 +85,11 @@
 - [x] Skip-VehicleEntityCollisionEvent-if-no-listeners.patch
 - [x] Skip-cloning-advancement-criteria.patch — *포팅 불필요: 이미 Gale/Mirai 기반에 포함되어 있음 (Advancement 레코드 압축 생성자에 이미 적용됨)*
 - [x] Skip-entity-move-if-movement-is-zero.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (Entity.java에 boundingBoxChanged 필드 이미 존재)*
-- [ ] Skip-inactive-entity-for-execute.patch
+- [ ] Skip-inactive-entity-for-execute.patch — *보류: 신규 config 모듈 + Leaves ServerPhotographer 필요, 전용 세션 권장*
 - [x] Skip-item-merge-checks-for-full-stacks.patch
 - [x] Skip-negligible-planar-movement-multiplication.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Entity.java에 oldDeltaMovement 가드 이미 존재)*
 - [x] Skip-secondary-POI-sensor-if-absent.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (SecondaryPoiSensor.java에 이미 적용됨)*
-- [ ] Spread-out-sending-all-player-info.patch
+- [x] Spread-out-sending-all-player-info.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음 (PlayerList.java에 sendAllPlayerInfoBuckets 이미 존재)*
 - [x] Store-mob-counts-in-an-array.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (LocalMobCapCalculator.java에 int[] counts 이미 존재)*
 - [x] Update-boss-bar-within-tick.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (Raid.java에 isBarDirty 필드 이미 존재)*
 - [x] Use-linked-map-for-entity-trackers.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (ChunkMap.java entityMap이 이미 Int2ObjectLinkedOpenHashMap)*
@@ -106,7 +106,7 @@
 - [x] optimize-PathNavigation-followThePath.patch — *포팅 완료 (Path#getNextNode() 직접 사용으로 getNextNodePos()의 Vec3i 할당 회피)*
 - [x] optimize-SimpleBitStorage-object-layout.patch
 - [x] optimize-applyMovementEmissionAndPlaySound.patch — *포팅 완료. getBlockStateIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getBlockStateIfLoaded(BlockPos)로 대체*
-- [ ] optimize-attribute.patch
+- [ ] optimize-attribute.patch — *보류: AttributeInstanceArrayMap 등 대규모 신규 컬렉션 인프라 필요, 전용 세션 권장*
 - [x] optimize-canHoldAnyFluid.patch
 - [ ] optimize-checkInsideBlocks-calls.patch — *보류: upstream 대상 메서드가 `checkInsideBlocks(Vec3,Vec3,InsideBlockEffectApplier.StepBasedCollector,LongSet,int)`인데 1.21.4엔 `checkInsideBlocks(List<Entity.Movement>,Set<BlockState>)`로 완전히 다른(구버전) 아키텍처라 처음부터 재구현 필요, 전용 세션 권장*
 - [x] optimize-collidedAlongVector.patch — *포팅 완료. 원본은 3개 호출부(Entity 2군데+Ghast)를 건드리지만 1.21.4는 entity-inside-block 충돌 코드가 구버전 구조라 호출부가 1개뿐이라 그 1곳에만 적용 (AABB#collidedAlongVector(Vec3,AABB) 단일-AABB 패스트패스 추가)*
@@ -117,7 +117,7 @@
 - [x] optimize-isStateClimbable.patch
 - [ ] optimize-mob-despawn.patch — *보류: 신규 KDTree3D 유틸리티 + 신규 config 모듈(OptimizeDespawn) + Mob 디스폰 로직 전체 재구현(entity.checkDespawn()을 우회) 필요. 버그 시 테임된/네임태그 붙은 몹이 잘못 디스폰될 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] optimize-movement-vector-normalization.patch — *포팅 불필요: 1.21.4의 Entity#checkFallDamage엔 이 최적화 대상인 8블록 clamp/normalize 로직 자체가 없음(더 최신 MC 버전에서 추가된 로직)*
-- [ ] optimize-no-action-time.patch
+- [x] optimize-no-action-time.patch — *포팅 완료. 신규 config 모듈 OptimizeNoActionTime 추가(disableLightCheck, 기본값 false)*
 - [x] optimize-tickEffects.patch — *포팅 완료(1.21.4엔 ServerLevel 분기가 없는 더 단순한 구조라 그 구조에 맞춰 empty-check 가드만 적용)*
 - [x] optimize-waypoint.patch — *포팅 불필요: 1.21.4엔 Waypoint(로케이터 바) 기능 자체가 없음(WaypointTransmitter 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] reduce-enchantment-allocations.patch
@@ -126,6 +126,8 @@
 - [ ] thread-unsafe-chunk-map.patch — *보류: moonrise 청크 시스템의 핵심 동시성 인프라(ChunkHolderManager)를 건드리는 고위험 패치. 신규 org.dreeam.leaf.world.ChunkCache 유틸리티 필요 + 잘못 포팅 시 청크 로딩 레이스 컨디션/월드 손상 리스크, 전용 세션에서 신중히 검증 권장*
 
 ## paper-patches (15개)
+
+> 이 섹션은 이번 세션에서 미착수. `paper-server/.git` 워킹트리 + 별도 rebuild 태스크 확인이 먼저 필요함 (leaf-api의 `rebuildPaperApiFeaturePatches`에 대응하는 leaf-server 쪽 태스크는 아직 미탐색).
 
 - [ ] Fish-Parallel-World-Ticking-API.patch
 - [ ] Leaf-Test-Async-Executor.patch
@@ -146,12 +148,14 @@
 ## leaf-api (5개)
 
 - [x] Cache-namespacedKey-toString-and-hash.patch
-- [ ] Fish-Parallel-World-Ticking-API.patch
-- [ ] Player-canSee-by-entity-UUID.patch
+- [ ] Fish-Parallel-World-Ticking-API.patch — *보류: API 인터페이스만으로는 불완전, 실제 구현체(CraftServer 등)는 미착수 paper-patches 레이어에 있음*
+- [ ] Player-canSee-by-entity-UUID.patch — *보류: Player.java에 추상 메서드만 추가하는 패치라 실제 구현(CraftPlayer)이 필요한데 그건 미착수 paper-patches 레이어에 있음. 구현 없이 인터페이스만 추가하면 컴파일이 깨지거나 미구현 API가 됨*
 - [x] Replace-data-maps-with-optimized-collection.patch
-- [ ] SIMD-support.patch
+- [ ] SIMD-support.patch — *보류: paper-patches 레이어의 SIMD-support(0011)와 짝을 이루는 패치, 그쪽 없이는 의미 없음*
 
-**진행률: 94 / 138 체크됨** (실제 포팅 34개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 96 / 138 체크됨** (실제 포팅 34개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 15 (조사 위주, 신규 포팅 없음)**: Spread-out-sending-all-player-info는 이미 Gale/Purpur 기반에 구현되어 있어 불필요 확인. `Add-io_uring-support`는 실제로 시도해봄 — netty-incubator-transport-native-io_uring:0.0.26.Final 의존성(linux-x86_64/aarch_64 클래시파이어 확인됨)까지 추가했으나, 대상 클래스(EventLoopGroupHolder.java)가 1.21.4엔 존재하지 않고 훨씬 단순한 네트워크 부트스트랩 구조(ServerConnectionListener.java 안에서 NIO/Epoll만 직접 분기)라 핵심 접속 수락 로직을 직접 건드려야 해서 되돌림(빌드 의존성 변경도 원복 완료, git status 클린 확인). 나머지 대형 후보(Paper-PR-Optimise-temptation-lookups 2개, Luminol-Configurable-region-format-framework, Replace-brain-with-optimized-collection 등)는 각각 33개+ 파일/월드 저장 포맷/전체 몹 AI 저장소 급의 초대형·고위험 변경이라 스코프만 확인하고 보류 처리. leaf-api의 Fish-Parallel-World-Ticking-API/Player-canSee-by-entity-UUID/SIMD-support는 API 인터페이스만 있고 실제 구현이 미착수 paper-patches 레이어에 있어 보류. paper-patches(15개) 섹션 전체는 이번 세션에서 레이어 자체를 미착수.
 
 **Batch 14**: `optimize-no-action-time`(신규 config 모듈 OptimizeNoActionTime 추가, disableLightCheck 기본값 false), `Lithium-combined-heightmap-update`(신규 유틸리티 클래스 `net.caffeinemc.mods.lithium.common.world.chunk.heightmap.CombinedHeightmapUpdate` 추가 — MOTION_BLOCKING/MOTION_BLOCKING_NO_LEAVES/OCEAN_FLOOR/WORLD_SURFACE 4개 heightmap을 한 번의 top-down 스캔으로 동시 갱신, Heightmap.java에 isOpaque()/setHeight() public 접근자 추가)를 포팅. cache-biome-for-mob-spawning-and-advancements는 이미 Leaf 자체 기반에 구현되어 있어 불필요, Replace-entity-equipment-items-to-array와 Lithium-equipment-tracking은 둘 다 1.21.4에 EntityEquipment 클래스가 없어 포팅 불가로 확인. optimize-checkInsideBlocks-calls(구버전 아키텍처), optimize-goal-selector(신규 커스텀 Set 전체 필요), thread-unsafe-chunk-map(청크 시스템 핵심 동시성 변경), Lithium-faster-hash-palette(신규 팔레트 알고리즘 전체 필요, 월드 데이터 손상 리스크), Leaves-Lithium-Sleeping-Block-Entity+fixup(2256+495줄 초대형)은 모두 고위험/대규모로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트(예외 0건) + heightmap 전용 헤드리스 봇 검증(스폰 지점 아래 단단한 지형, 낙하 없음, 주변 9개 컬럼 지형 정상)까지 통과.
 
