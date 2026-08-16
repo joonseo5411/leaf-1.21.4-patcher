@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:39:53 +0900
+Subject: [PATCH] optimize collidedAlongVector (single-AABB fast path, adapted
+ to 1.21.4's entity-inside-block collision code)
+
+
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index a145ecbd189a12fdf612de6339cdf8f1aa33be6d..a8ac8e4e953cdc00033efb652b4295be6fbfc3d8 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -1740,7 +1740,11 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+     private boolean collidedWithShapeMovingFrom(Vec3 oldPosition, Vec3 position, BlockPos pos, VoxelShape shape) {
+         AABB aabb = this.makeBoundingBox(oldPosition);
+         Vec3 vec3 = position.subtract(oldPosition);
+-        return aabb.collidedAlongVector(vec3, shape.move(new Vec3(pos)).toAabbs());
++        // Leaf start - optimize collidedAlongVector
++        VoxelShape movedShape = shape.move(new Vec3(pos));
++        AABB singleAabb = ((ca.spottedleaf.moonrise.patches.collisions.shape.CollisionVoxelShape) movedShape).moonrise$getSingleAABBRepresentation();
++        return singleAabb != null ? aabb.collidedAlongVector(vec3, singleAabb) : aabb.collidedAlongVector(vec3, movedShape.toAabbs());
++        // Leaf end - optimize collidedAlongVector
+     }
+ 
+     protected void onInsideBlock(BlockState state) {
+diff --git a/net/minecraft/world/phys/AABB.java b/net/minecraft/world/phys/AABB.java
+index f64c04b32dd2d0fe143fc8bf9f498e52beb66a58..91a67b9642d630aa2a9bad46baec41bacffa8f58 100644
+--- a/net/minecraft/world/phys/AABB.java
++++ b/net/minecraft/world/phys/AABB.java
+@@ -413,6 +413,15 @@ public class AABB {
+         }
+     }
+ 
++    // Leaf start - optimize collidedAlongVector
++    public final boolean collidedAlongVector(Vec3 vector, AABB aabb) {
++        Vec3 center = this.getCenter();
++        Vec3 vec3 = center.add(vector);
++        AABB aabb1 = aabb.inflate(this.getXsize() * 0.5 - 1.0E-7, this.getYsize() * 0.5 - 1.0E-7, this.getZsize() * 0.5 - 1.0E-7);
++        return aabb1.contains(vec3) || aabb1.contains(center) || aabb1.clip(center, vec3).isPresent();
++    }
++    // Leaf end - optimize collidedAlongVector
++
+     public boolean collidedAlongVector(Vec3 vector, List<AABB> boxes) {
+         Vec3 center = this.getCenter();
+         Vec3 vec3 = center.add(vector);

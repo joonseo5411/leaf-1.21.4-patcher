@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:39:53 +0900
+Subject: [PATCH] optimize tickEffects (skip empty iteration/processing)
+
+
+diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
+index 64be21e794ed8622ca4c0bce0b4f9c7f91b9e273..9413ae3b7f8edcebff63f1c5b56bae4b3884bc9f 100644
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -925,6 +925,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+     // CraftBukkit end
+ 
+     protected void tickEffects() {
++        if (!this.activeEffects.isEmpty()) { // Leaf - optimize tickEffects
+         Iterator<Holder<MobEffect>> iterator = this.activeEffects.keySet().iterator();
+ 
+         this.isTickingEffects = true; // CraftBukkit
+@@ -952,6 +953,8 @@ public abstract class LivingEntity extends Entity implements Attackable {
+ 
+         // CraftBukkit start
+         this.isTickingEffects = false;
++        } // Leaf - optimize tickEffects
++        if (!this.effectsToProcess.isEmpty()) { // Leaf - optimize tickEffects
+         for (ProcessableEffect effect : this.effectsToProcess) {
+             if (effect.effect != null) {
+                 this.addEffect(effect.effect, effect.cause);
+@@ -960,6 +963,7 @@ public abstract class LivingEntity extends Entity implements Attackable {
+             }
+         }
+         this.effectsToProcess.clear();
++        } // Leaf - optimize tickEffects
+         // CraftBukkit end
+         if (this.effectsDirty) {
+             if (!this.level().isClientSide) {

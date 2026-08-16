@@ -8,7 +8,7 @@
 
 - [ ] Add-io_uring-support.patch
 - [ ] Better-checking-for-useless-move-packets.patch
-- [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch
+- [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch — *범위 밖: 순수 최적화가 아닌 gameplay/네트워킹 가시성 수정(공격자가 근처 플레이어에게 트래킹 안 될 때 크리티컬 애니메이션이 안 보이는 문제) + 신규 config 필드 필요, 최적화 백포트 범위에서 제외*
 - [x] Cache-ShapePairKey-hash.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Block.ShapePairKey에 hash 필드 이미 존재)*
 - [x] Cache-block-state-tags.patch
 - [x] Cache-identifier-toString-and-hash.patch
@@ -17,9 +17,9 @@
 - [x] Check-frozen-ticks-before-landing-block.patch — *포팅 불필요: 검증 결과 이미 Gale 기반에 포함(추정, 관련 로직 확인)*
 - [x] Check-targeting-range-before-getting-visibility.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (TargetingConditions.java에 followRangeRaw 조기 return 이미 존재)*
 - [x] Don-t-load-POI-for-competitor-scan.patch
-- [ ] Don-t-load-chunks-to-spawn-phantoms.patch
+- [x] Don-t-load-chunks-to-spawn-phantoms.patch — *포팅 불필요: 이미 Gale/MultiPaper 기반에 포함되어 있음 (PhantomSpawner.java에 galeConfig().smallOptimizations.loadChunks.toSpawnPhantoms 이미 존재)*
 - [x] Faster-floating-point-positive-modulo.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Mth.java positiveModuloForPositiveIntegerDenominator 등 이미 존재)*
-- [ ] Filter-ClientboundSetEntityMotionPacket.patch
+- [x] Filter-ClientboundSetEntityMotionPacket.patch — *포팅 완료(기본값 false로 기존 동작 유지). 기존 ReduceUselessPackets config 모듈에 filterClientboundSetEntityMotionPacket 필드 추가 + ServerEntity.java 1곳(1.21.4엔 Folia 전용 두번째 tracker 경로 없어 1곳만 존재)에 적용*
 - [x] For-collision-check-has-physics-before-same-vehicle.patch — *포팅 불필요: 이미 Gale/Akarin 기반에 포함되어 있음*
 - [x] Initialize-line-of-sight-cache-with-low-capacity.patch — *포팅 불필요: 이미 상위 최적화(Reduce line of sight updates)에 흡수되어 포함되어 있음*
 - [ ] Leaves-Lithium-Sleeping-Block-Entity.patch
@@ -35,18 +35,18 @@
 - [x] Optimize-VarInt-write-and-VarLong-write.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음 (VarInt.java/VarLong.java에 이미 존재)*
 - [x] Optimize-Vec3i-hashing.patch
 - [x] Optimize-map-lookups-with-isEmpty-check.patch
-- [ ] Optimize-matching-item-checks.patch
+- [x] Optimize-matching-item-checks.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ItemStack.java isSameItem/isSameItemSameComponents에 stack == other 조기 return 이미 존재)*
 - [x] Optimize-noise-generation.patch — *포팅 불필요: 이미 Gale/C2ME 기반에 포함되어 있음 (ImprovedNoise.java FLAT_SIMPLEX_GRAD 이미 존재)*
 - [x] Optimize-pushable-selector.patch
 - [ ] Optimize-random-calls-in-chunk-ticking.patch
-- [ ] Optimize-respawn-anchor-explosion.patch
+- [x] Optimize-respawn-anchor-explosion.patch — *포팅 완료. getFluidStateIfLoadedUnchecked 헬퍼가 1.21.4엔 없지만 동일 역할의 기존 Level#getFluidIfLoaded(BlockPos)로 대체 적용, stream 제거*
 - [x] Optimize-sheep-offspring-color.patch — *포팅 불필요: 이미 Gale/carpet-fixes 기반에 포함되어 있음 (DyeColor.getMixedColor 이미 최적화됨)*
 - [x] Optimize-sun-burn-tick.patch — *포팅 불필요: 이미 Gale/JettPack 기반에 포함되어 있음 (Entity.isSunBurnTick 이미 캐싱 적용됨)*
 - [ ] Paper-PR-Optimise-temptation-lookups-changes.patch
 - [ ] Paper-PR-Optimise-temptation-lookups.patch
-- [ ] Pluto-Expose-Direction-Plane-s-faces.patch
-- [ ] Pluto-don-t-load-chunks-to-spread-grass.patch
-- [ ] Pluto-reduce-allocation.patch
+- [ ] Pluto-Expose-Direction-Plane-s-faces.patch — *보류: 692줄 대규모 변경, 전용 세션에서 처리 권장*
+- [x] Pluto-don-t-load-chunks-to-spread-grass.patch — *포팅 완료. getChunkAtIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getChunkIfLoaded(int,int)로 대체*
+- [x] Pluto-reduce-allocation.patch — *포팅 완료 (WireHandler UpdateOrder.values() 캐싱, SpawnPlacementTypes 중복 BlockPos 로컬 제거)*
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch
 - [x] Prevent-entities-random-strolling-into-non-ticking-c.patch — *포팅 불필요: 이미 Gale/MultiPaper 기반에 포함되어 있음*
@@ -109,17 +109,17 @@
 - [ ] optimize-attribute.patch
 - [x] optimize-canHoldAnyFluid.patch
 - [ ] optimize-checkInsideBlocks-calls.patch
-- [ ] optimize-collidedAlongVector.patch
-- [ ] optimize-collision-shape.patch
+- [x] optimize-collidedAlongVector.patch — *포팅 완료. 원본은 3개 호출부(Entity 2군데+Ghast)를 건드리지만 1.21.4는 entity-inside-block 충돌 코드가 구버전 구조라 호출부가 1개뿐이라 그 1곳에만 적용 (AABB#collidedAlongVector(Vec3,AABB) 단일-AABB 패스트패스 추가)*
+- [ ] optimize-collision-shape.patch — *보류: 원본이 대부분의 블록에 대해 constantCollisionShape를 무조건 설정하는 방식으로 변경하는데, 1.21.4의 전체 Block 서브클래스 중 CollisionContext 의존적인 것이 upstream이 배제한 3종(Liquid/Scaffolding/PowderSnow) 외에 더 있는지 전수 검증이 필요해 리스크 높음, 전용 세션 권장*
 - [x] optimize-get-chunk.patch — *Level#getBlockState(BlockPos) hunk만 포팅. SpreadingSnowyBlock.java 훅은 1.21.4에 해당 클래스가 없어(SpreadingSnowyDirtBlock으로 명칭 상이) 및 getChunkAtIfLoadedUnchecked 미존재로 스킵*
 - [x] optimize-getOnPos.patch
 - [ ] optimize-goal-selector.patch
 - [x] optimize-isStateClimbable.patch
 - [ ] optimize-mob-despawn.patch
-- [ ] optimize-movement-vector-normalization.patch
+- [x] optimize-movement-vector-normalization.patch — *포팅 불필요: 1.21.4의 Entity#checkFallDamage엔 이 최적화 대상인 8블록 clamp/normalize 로직 자체가 없음(더 최신 MC 버전에서 추가된 로직)*
 - [ ] optimize-no-action-time.patch
-- [ ] optimize-tickEffects.patch
-- [ ] optimize-waypoint.patch
+- [x] optimize-tickEffects.patch — *포팅 완료(1.21.4엔 ServerLevel 분기가 없는 더 단순한 구조라 그 구조에 맞춰 empty-check 가드만 적용)*
+- [x] optimize-waypoint.patch — *포팅 불필요: 1.21.4엔 Waypoint(로케이터 바) 기능 자체가 없음(WaypointTransmitter 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] reduce-enchantment-allocations.patch
 - [ ] remove-shouldTickBlocksAt-check.patch — *포팅 비권장: upstream 커밋 사유가 "BoundTickingBlockEntity#tick에 중복 체크 존재"인데 1.21.4엔 BoundTickingBlockEntity 클래스 자체가 없어 전제가 성립하지 않음*
 - [ ] rewrite-InsideBrownianWalk.patch
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 73 / 138 체크됨** (실제 포팅 24개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 83 / 138 체크됨** (실제 포팅 30개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 11**: `optimize-tickEffects`(1.21.4의 더 단순한 구조에 맞춰 empty-check 가드 적용), `Pluto-reduce-allocation`(WireHandler UpdateOrder.values() 캐싱 + SpawnPlacementTypes 중복 BlockPos 제거), `Pluto-don-t-load-chunks-to-spread-grass`(getChunkAtIfLoadedUnchecked 미존재로 기존 Level#getChunkIfLoaded로 대체), `Filter-ClientboundSetEntityMotionPacket`(기존 ReduceUselessPackets config 모듈에 필드 추가, 기본값 false), `Optimize-respawn-anchor-explosion`(getFluidStateIfLoadedUnchecked 미존재로 기존 Level#getFluidIfLoaded로 대체), `optimize-collidedAlongVector`(1.21.4는 entity-inside-block 충돌 코드가 구버전 구조라 호출부 1곳에만 적용)를 포팅. 첫 컴파일 시도에서 2개 컴파일 에러 발견 후 수정: (1) `net.minecraft.world.entity.animal.squid.Squid` → 1.21.4엔 `net.minecraft.world.entity.animal.Squid`(서브패키지 없음), (2) `Direction.Plane.HORIZONTAL.faces`가 1.21.4에선 private 필드라 `Plane`이 구현하는 `Iterable<Direction>` 인터페이스로 순회하도록 수정. 나머지 후보 중 6개는 이미 Gale/MultiPaper 기반에 구현되어 있었고(Don-t-load-chunks-to-spawn-phantoms, Optimize-matching-item-checks), 2개는 해당 기능/코드 자체가 1.21.4에 없어 불필요(optimize-movement-vector-normalization: 8블록 clamp 로직 부재, optimize-waypoint: Waypoint 기능 자체 부재), Broadcast-crit-animations는 순수 최적화가 아닌 gameplay 수정이라 범위 밖으로 판단, optimize-collision-shape와 Pluto-Expose-Direction-Plane-s-faces는 리스크/규모 문제로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증(컴파일 에러 수정 후 재테스트, 예외 0건).
 
 **Batch 10**: `reduce-optimiseRandomTick-new-BlockPos-instance-crea`(4개 파일의 `.immutable()` 안전 훅만 포팅 — ServerLevel의 공유 POS_CACHE 최적화는 신규 config 모듈 필요로 스킵), `cache-world-generator-sea-level`(NoiseBasedChunkGenerator#getSeaLevel 캐싱)을 포팅. 나머지 후보 11개 중 9개는 이미 Gale 기반에 구현되어 있었고(Check-targeting-range, Reduce-in-wall-checks, Variable-entity-wake-up-duration, Update-boss-bar-within-tick, Skip-PlayerCommandSendEvent, Skip-negligible-planar-movement, Replace-division/parts-by-size-in-CubePointRange), Remove-iterators-from-Inventory는 1.21.4 인벤토리 구조 자체가 달라 포팅 불가로 확인, Reduce-array-allocations(31개 파일)와 Remove-stream-in-CraftWorld-spawnParticle(paper-patches 레이어 필요)은 대규모/미탐색 인프라 필요로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증.
 
@@ -159,7 +161,7 @@
 
 **Phase 2 완료**: `Cache-block-state-tags` 기반 패치(BlockState에 `tagFlag` 캐시 필드 + `org.dreeam.leaf.util.BlockMasks` 유틸리티 추가; `pathType` 캐시는 1.21.4에 이미 별도로 존재해서 손댈 필요 없었음)를 실제로 포팅해서 `optimize-getOnPos`, `optimize-isStateClimbable`, `optimize-canHoldAnyFluid` 3개를 추가로 풀었음. 펜스/벽/펜스게이트/사다리/가루눈/트랩도어/덩굴/유체/가마솥 상호작용을 헤드리스 봇으로 전부 실전 테스트, 예외 0건.
 
-기타 보류: Optimize-respawn-anchor-explosion(getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(신규 config 모듈 + Leaves ServerPhotographer 필요), Rewrite-entity-despawn-time(엔티티 생명주기+청크시스템 광범위 변경), optimize-attribute(AttributeInstanceArrayMap 등 대규모 신규 컬렉션 인프라 필요)**
+기타 보류: Skip-inactive-entity-for-execute(신규 config 모듈 + Leaves ServerPhotographer 필요), Rewrite-entity-despawn-time(엔티티 생명주기+청크시스템 광범위 변경), optimize-attribute(AttributeInstanceArrayMap 등 대규모 신규 컬렉션 인프라 필요)**
 
 ## 포팅 절차 (참고)
 

@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:39:53 +0900
+Subject: [PATCH] Filter ClientboundSetEntityMotionPacket (config-gated,
+ default off)
+
+
+diff --git a/net/minecraft/server/level/ServerEntity.java b/net/minecraft/server/level/ServerEntity.java
+index 5351d373aa0f4450386a6b50f88052c031949f5b..bdb22a808123b9b6b038c58acd02fc184aae1c1a 100644
+--- a/net/minecraft/server/level/ServerEntity.java
++++ b/net/minecraft/server/level/ServerEntity.java
+@@ -225,7 +225,12 @@ public class ServerEntity {
+                                         )
+                                     )
+                                 );
+-                        } else {
++                        } else if (!org.dreeam.leaf.config.modules.opt.ReduceUselessPackets.filterClientboundSetEntityMotionPacket || // Canvas - filter ClientboundSetEntityMotionPacket
++                            (this.entity instanceof net.minecraft.world.entity.item.ItemEntity && flag1) ||
++                            this.entity instanceof net.minecraft.world.entity.projectile.EyeOfEnder ||
++                            this.entity instanceof net.minecraft.world.entity.animal.Squid ||
++                            this.entity instanceof net.minecraft.world.entity.projectile.ShulkerBullet
++                        ) {
+                             this.broadcast.accept(new ClientboundSetEntityMotionPacket(this.entity.getId(), this.lastSentMovement));
+                         }
+                     }

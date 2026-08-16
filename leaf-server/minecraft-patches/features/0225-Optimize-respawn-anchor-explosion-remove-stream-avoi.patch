@@ -1,0 +1,61 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:39:53 +0900
+Subject: [PATCH] Optimize respawn anchor explosion (remove stream, avoid
+ unnecessary chunk load)
+
+
+diff --git a/net/minecraft/world/level/block/RespawnAnchorBlock.java b/net/minecraft/world/level/block/RespawnAnchorBlock.java
+index 0631e6f0c242a1fc1dfa606a4d60686c31c7eb13..0dc7a5533b78d64a05f90a2445b5bc48f2e4291c 100644
+--- a/net/minecraft/world/level/block/RespawnAnchorBlock.java
++++ b/net/minecraft/world/level/block/RespawnAnchorBlock.java
+@@ -128,7 +128,8 @@ public class RespawnAnchorBlock extends Block {
+     }
+ 
+     private static boolean isWaterThatWouldFlow(BlockPos pos, Level level) {
+-        FluidState fluidState = level.getFluidState(pos);
++        FluidState fluidState = level.getFluidIfLoaded(pos); // Leaf - Optimize respawn anchor explosion
++        if (fluidState == null) return false; // Leaf - Optimize respawn anchor explosion
+         if (!fluidState.is(FluidTags.WATER)) {
+             return false;
+         } else if (fluidState.isSource()) {
+@@ -138,21 +139,34 @@ public class RespawnAnchorBlock extends Block {
+             if (f < 2.0F) {
+                 return false;
+             } else {
+-                FluidState fluidState1 = level.getFluidState(pos.below());
+-                return !fluidState1.is(FluidTags.WATER);
++                FluidState fluidState1 = level.getFluidIfLoaded(pos.below()); // Leaf - Optimize respawn anchor explosion
++                return fluidState1 != null && !fluidState1.is(FluidTags.WATER); // Leaf - Optimize respawn anchor explosion
+             }
+         }
+     }
+ 
++    // Leaf start - Optimize respawn anchor explosion
++    private static boolean hasWaterFlow(Level level, BlockPos secondPos) {
++        for (Direction direction : Direction.Plane.HORIZONTAL) {
++            final BlockPos blockPos = secondPos.relative(direction);
++            if (isWaterThatWouldFlow(blockPos, level)) {
++                return true;
++            }
++        }
++
++        final FluidState fluidStateAbove = level.getFluidIfLoaded(secondPos.above());
++
++        return fluidStateAbove != null && fluidStateAbove.is(FluidTags.WATER);
++    }
++    // Leaf end - Optimize respawn anchor explosion
++
+     private void explode(BlockState state, Level level, final BlockPos pos2) {
+         org.bukkit.block.BlockState blockState = org.bukkit.craftbukkit.block.CraftBlock.at(level, pos2).getState(); // CraftBukkit - capture BlockState before remove block
+         level.removeBlock(pos2, false);
+-        boolean flag = Direction.Plane.HORIZONTAL.stream().map(pos2::relative).anyMatch(pos -> isWaterThatWouldFlow(pos, level));
+-        final boolean flag1 = flag || level.getFluidState(pos2.above()).is(FluidTags.WATER);
+         ExplosionDamageCalculator explosionDamageCalculator = new ExplosionDamageCalculator() {
+             @Override
+             public Optional<Float> getBlockExplosionResistance(Explosion explosion, BlockGetter reader, BlockPos pos, BlockState state1, FluidState fluid) {
+-                return pos.equals(pos2) && flag1
++                return pos.equals(pos2) && hasWaterFlow(level, pos2) // Leaf - Optimize respawn anchor explosion
+                     ? Optional.of(Blocks.WATER.getExplosionResistance())
+                     : super.getBlockExplosionResistance(explosion, reader, pos, state1, fluid);
+             }

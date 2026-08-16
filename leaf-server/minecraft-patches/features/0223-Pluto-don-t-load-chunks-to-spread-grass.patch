@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 19:39:53 +0900
+Subject: [PATCH] Pluto - don't load chunks to spread grass
+
+
+diff --git a/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java b/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java
+index 722f2b9a24679e0fc67aae2cd27051f96f962efe..012a5a6fd4f963a2787b45897c9fbbe5cc22b2f6 100644
+--- a/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java
++++ b/net/minecraft/world/level/block/SpreadingSnowyDirtBlock.java
+@@ -71,21 +71,29 @@ public abstract class SpreadingSnowyDirtBlock extends SnowyDirtBlock {
+ 
+                 for (int i = 0; i < 4; i++) {
+                     BlockPos blockPos = pos.offset(random.nextInt(3) - 1, random.nextInt(5) - 3, random.nextInt(3) - 1);
++                    // Pluto start - don't load chunks to spread grass
+                     // Paper start - Perf: optimize dirt and snow spreading
+                     if (pos.getX() == blockPos.getX() && pos.getY() == blockPos.getY() && pos.getZ() == blockPos.getZ()) {
+                         continue;
+                     }
+ 
+-                    final net.minecraft.world.level.chunk.ChunkAccess access;
+-                    if (cachedBlockChunk.locX == blockPos.getX() >> 4 && cachedBlockChunk.locZ == blockPos.getZ() >> 4) {
+-                        access = cachedBlockChunk;
++                    int x = blockPos.getX();
++                    int y = blockPos.getY();
++                    int z = blockPos.getZ();
++                    final net.minecraft.world.level.chunk.LevelChunk access;
++                    if (cachedBlockChunk.locX == x >> 4 && cachedBlockChunk.locZ == z >> 4) {
++                        access = (net.minecraft.world.level.chunk.LevelChunk) cachedBlockChunk;
+                     } else {
+-                        access = level.getChunkAt(blockPos);
++                        access = level.getChunkIfLoaded(x >> 4, z >> 4);
++                        if (access == null) {
++                            continue;
++                        }
+                     }
+-                    if (access.getBlockState(blockPos).is(Blocks.DIRT) && SpreadingSnowyDirtBlock.canPropagate(access, blockState, level, blockPos)) {
+-                        org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockSpreadEvent(level, pos, blockPos, (BlockState) blockState.setValue(SpreadingSnowyDirtBlock.SNOWY, isSnowySetting(access.getBlockState(blockPos.above())))); // CraftBukkit
++                    if (access.getBlockStateFinal(x, y, z).is(Blocks.DIRT) && SpreadingSnowyDirtBlock.canPropagate(access, blockState, level, blockPos)) {
++                        org.bukkit.craftbukkit.event.CraftEventFactory.handleBlockSpreadEvent(level, pos, blockPos, (BlockState) blockState.setValue(SpreadingSnowyDirtBlock.SNOWY, isSnowySetting(access.getBlockStateFinal(x, y + 1, z)))); // CraftBukkit
+                         // Paper end - Perf: optimize dirt and snow spreading
+                     }
++                    // Pluto end - don't load chunks to spread grass
+                 }
+             }
+         }
