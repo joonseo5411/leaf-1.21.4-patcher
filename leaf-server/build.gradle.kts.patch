@@ -175,8 +175,8 @@
      // Spark
 -    implementation("me.lucko:spark-api:0.1-20240720.200737-2")
 -    implementation("me.lucko:spark-paper:1.10.119-20241121.092015-1")
-+    implementation("me.lucko:spark-api:0.1-dev-462d7f8-SNAPSHOT")
-+    implementation("me.lucko:spark-paper:1.10-dev-462d7f8-SNAPSHOT")
++    implementation("me.lucko:spark-api:0.1-dev-f181ccf-SNAPSHOT")
++    implementation("me.lucko:spark-paper:1.10-dev-f181ccf-SNAPSHOT")
 +
 +    implementation("io.netty:netty-all:4.1.127.Final") // Dreeam TODO - Update to 4.2.0
 +    // Leaf end - Bump Dependencies
