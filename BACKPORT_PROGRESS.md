@@ -73,7 +73,7 @@
 - [x] Replace-EntitySelectorOptions-map-with-optimized-col.patch
 - [ ] Replace-brain-with-optimized-collection.patch
 - [x] Replace-division-by-multiplication-in-CubePointRange.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (CubePointRange.java에 scale 필드 이미 존재)*
-- [ ] Replace-entity-equipment-items-to-array.patch
+- [x] Replace-entity-equipment-items-to-array.patch — *포팅 불필요: 1.21.4엔 EntityEquipment 클래스 자체가 없음(장비를 별도 Map으로 관리하는 상위 버전의 리팩터링 이전 구조, 이미 Remove-iterators-from-Inventory 조사에서 동일하게 확인됨)*
 - [x] Replace-parts-by-size-in-CubePointRange.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (CubePointRange.java에 size 필드 이미 존재)*
 - [x] Replace-throttle-tracker-map-with-optimized-collecti.patch — *포팅 불필요: 이미 Gale/Dionysus 기반에 포함되어 있음 (ServerHandshakePacketListenerImpl.java에 이미 적용됨)*
 - [ ] Rewrite-entity-despawn-time.patch
@@ -97,7 +97,7 @@
 - [ ] Virtual-thread-support-for-chat-executor.patch
 - [ ] Virtual-thread-support-for-download-pool.patch
 - [ ] async-chunk-sender.patch
-- [ ] cache-biome-for-mob-spawning-and-advancements.patch
+- [x] cache-biome-for-mob-spawning-and-advancements.patch — *포팅 불필요: 이미 Leaf 자체 기반에 거의 동일한 형태로 포함되어 있음 (BiomeManager.getBiomeCached, OptimizeBiome config 모듈, NaturalSpawner/LocationPredicate 호출부 모두 이미 존재. 청크 패스트패스가 빠진 단일-인자 버전이지만 캐싱 자체는 동작함)*
 - [x] cache-collision-list.patch
 - [x] fast-bit-radix-sort.patch — *포팅 불필요: 이미 다른 형태(List<T>+Class 기반 API)로 구현되어 있음 (NearestItemSensor.itemSorter)*
 - [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
@@ -108,12 +108,12 @@
 - [x] optimize-applyMovementEmissionAndPlaySound.patch — *포팅 완료. getBlockStateIfLoadedUnchecked가 1.21.4엔 없어 동일 역할의 기존 Level#getBlockStateIfLoaded(BlockPos)로 대체*
 - [ ] optimize-attribute.patch
 - [x] optimize-canHoldAnyFluid.patch
-- [ ] optimize-checkInsideBlocks-calls.patch
+- [ ] optimize-checkInsideBlocks-calls.patch — *보류: upstream 대상 메서드가 `checkInsideBlocks(Vec3,Vec3,InsideBlockEffectApplier.StepBasedCollector,LongSet,int)`인데 1.21.4엔 `checkInsideBlocks(List<Entity.Movement>,Set<BlockState>)`로 완전히 다른(구버전) 아키텍처라 처음부터 재구현 필요, 전용 세션 권장*
 - [x] optimize-collidedAlongVector.patch — *포팅 완료. 원본은 3개 호출부(Entity 2군데+Ghast)를 건드리지만 1.21.4는 entity-inside-block 충돌 코드가 구버전 구조라 호출부가 1개뿐이라 그 1곳에만 적용 (AABB#collidedAlongVector(Vec3,AABB) 단일-AABB 패스트패스 추가)*
 - [ ] optimize-collision-shape.patch — *보류: 원본이 대부분의 블록에 대해 constantCollisionShape를 무조건 설정하는 방식으로 변경하는데, 1.21.4의 전체 Block 서브클래스 중 CollisionContext 의존적인 것이 upstream이 배제한 3종(Liquid/Scaffolding/PowderSnow) 외에 더 있는지 전수 검증이 필요해 리스크 높음, 전용 세션 권장*
 - [x] optimize-get-chunk.patch — *Level#getBlockState(BlockPos) hunk만 포팅. SpreadingSnowyBlock.java 훅은 1.21.4에 해당 클래스가 없어(SpreadingSnowyDirtBlock으로 명칭 상이) 및 getChunkAtIfLoadedUnchecked 미존재로 스킵*
 - [x] optimize-getOnPos.patch
-- [ ] optimize-goal-selector.patch
+- [ ] optimize-goal-selector.patch — *보류: 신규 커스텀 Set 구현체(org.dreeam.leaf.util.map.BinaryGoalSet) 전체를 새로 작성해야 함, GoalSelector 순회 순서 버그 시 전체 몹 AI가 깨질 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] optimize-isStateClimbable.patch
 - [ ] optimize-mob-despawn.patch — *보류: 신규 KDTree3D 유틸리티 + 신규 config 모듈(OptimizeDespawn) + Mob 디스폰 로직 전체 재구현(entity.checkDespawn()을 우회) 필요. 버그 시 테임된/네임태그 붙은 몹이 잘못 디스폰될 리스크가 있어 전용 세션에서 신중히 검증 권장*
 - [x] optimize-movement-vector-normalization.patch — *포팅 불필요: 1.21.4의 Entity#checkFallDamage엔 이 최적화 대상인 8블록 clamp/normalize 로직 자체가 없음(더 최신 MC 버전에서 추가된 로직)*
@@ -123,7 +123,7 @@
 - [x] reduce-enchantment-allocations.patch
 - [ ] remove-shouldTickBlocksAt-check.patch — *포팅 비권장: upstream 커밋 사유가 "BoundTickingBlockEntity#tick에 중복 체크 존재"인데 1.21.4엔 BoundTickingBlockEntity 클래스 자체가 없어 전제가 성립하지 않음*
 - [x] rewrite-InsideBrownianWalk.patch — *포팅 불필요: 이미 Leaf 자체 최적화("Remove streams on InsideBrownianWalk")로 stream 제거 + 수동 루프 적용됨. 남은 차이(BlockAreaUtils 배열 + Fisher-Yates vs 현재의 ArrayList + Collections.shuffle)는 미미한 추가 이득이라 스킵*
-- [ ] thread-unsafe-chunk-map.patch
+- [ ] thread-unsafe-chunk-map.patch — *보류: moonrise 청크 시스템의 핵심 동시성 인프라(ChunkHolderManager)를 건드리는 고위험 패치. 신규 org.dreeam.leaf.world.ChunkCache 유틸리티 필요 + 잘못 포팅 시 청크 로딩 레이스 컨디션/월드 손상 리스크, 전용 세션에서 신중히 검증 권장*
 
 ## paper-patches (15개)
 
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 90 / 138 체크됨** (실제 포팅 32개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 92 / 138 체크됨** (실제 포팅 32개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 13 (조사만, 신규 포팅 없음)**: cache-biome-for-mob-spawning-and-advancements는 이미 Leaf 자체 기반에 거의 동일하게 구현되어 있어 불필요로 확인, Replace-entity-equipment-items-to-array는 1.21.4엔 EntityEquipment 클래스 자체가 없어 포팅 불가로 확인. optimize-checkInsideBlocks-calls(대상 메서드 시그니처 자체가 다른 구버전 아키텍처), optimize-goal-selector(신규 커스텀 Set 구현체 전체 필요 + 몹 AI 전반 리스크), thread-unsafe-chunk-map(moonrise 청크 시스템 핵심 동시성 인프라 변경, 월드 손상 리스크)은 모두 고위험/대규모로 판단해 전용 세션으로 보류.
 
 **Batch 12**: `optimize-applyMovementEmissionAndPlaySound`(getBlockStateIfLoadedUnchecked 미존재로 기존 Level#getBlockStateIfLoaded로 대체), `optimize-PathNavigation-followThePath`(Path#getNextNode() 직접 사용으로 getNextNodePos()의 Vec3i 할당 회피)를 포팅. 나머지 후보 중 5개는 이미 Gale/Airplane/Dionysus/VMP 기반에 구현되어 있었고(Better-checking-for-useless-move-packets, Optimize-random-calls-in-chunk-ticking, Use-linked-map-for-entity-trackers, Replace-throttle-tracker-map), rewrite-InsideBrownianWalk는 이미 Leaf 자체 stream 제거 최적화로 커버되어 있어 불필요, optimize-mob-despawn은 신규 KDTree3D 유틸+config 모듈+디스폰 로직 전체 재구현이 필요하고 버그 시 테임/네임태그 몹이 잘못 디스폰될 리스크가 있어 보류, Prevent-entities-from-moving-into-weak-loaded-chunks는 8개 파일(투사체 클래스 다수 포함) 규모라 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증, 예외 0건.
 
