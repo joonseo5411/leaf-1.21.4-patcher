@@ -145,10 +145,10 @@
 
 ## leaf-api (5개)
 
-- [ ] Cache-namespacedKey-toString-and-hash.patch
+- [x] Cache-namespacedKey-toString-and-hash.patch
 - [ ] Fish-Parallel-World-Ticking-API.patch
 - [ ] Player-canSee-by-entity-UUID.patch
-- [ ] Replace-data-maps-with-optimized-collection.patch
+- [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
 **진행률: 56 / 138 체크됨** (실제 포팅 20개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.

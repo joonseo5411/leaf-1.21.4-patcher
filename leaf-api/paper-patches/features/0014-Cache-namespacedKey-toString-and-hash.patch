@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 16:59:16 +0900
+Subject: [PATCH] Cache namespacedKey toString and hash
+
+Backported from Leaf ver/26.2 (original author: OverwriteMC) to
+ver/1.21.4.
+
+diff --git a/src/main/java/org/bukkit/NamespacedKey.java b/src/main/java/org/bukkit/NamespacedKey.java
+index cb5782340084d4f8ebd98d3bb6c21b678948044e..480180ee18a19b91b36f8e075bc42331ea71fdb2 100644
+--- a/src/main/java/org/bukkit/NamespacedKey.java
++++ b/src/main/java/org/bukkit/NamespacedKey.java
+@@ -33,6 +33,10 @@ public final class NamespacedKey implements net.kyori.adventure.key.Key, com.des
+     //
+     private final String namespace;
+     private final String key;
++    // Leaf start - Cache namespacedKey toString and hash
++    private String keyStr;
++    private int hash;
++    // Leaf end - Cache namespacedKey toString and hash
+ 
+     private static boolean isValidNamespaceChar(char c) {
+         return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '.' || c == '_' || c == '-';
+@@ -133,11 +137,14 @@ public final class NamespacedKey implements net.kyori.adventure.key.Key, com.des
+ 
+     @Override
+     public int hashCode() {
+-        // Paper start
+-        int result = this.namespace.hashCode();
+-        result = (31 * result) + this.key.hashCode();
+-        return result;
+-        // Paper end
++        // Leaf start - Cache namespacedKey toString and hash
++        int hash = this.hash;
++        if (hash == 0) {
++            hash = (31 * this.namespace.hashCode()) + this.key.hashCode();
++            this.hash = hash;
++        }
++        return hash;
++        // Leaf end - Cache namespacedKey toString and hash
+     }
+ 
+     @Override
+@@ -153,7 +160,14 @@ public final class NamespacedKey implements net.kyori.adventure.key.Key, com.des
+ 
+     @Override
+     public String toString() {
+-        return this.namespace + ":" + this.key;
++        // Leaf start - Cache namespacedKey toString and hash
++        String keyStr = this.keyStr;
++        if (keyStr == null) {
++            keyStr = this.namespace + ":" + this.key;
++            this.keyStr = keyStr;
++        }
++        return keyStr;
++        // Leaf end - Cache namespacedKey toString and hash
+     }
+ 
+     /**
