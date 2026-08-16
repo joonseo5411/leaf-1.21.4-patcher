@@ -59,7 +59,7 @@
 - [x] Reduce-in-wall-checks.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (LivingEntity.java에 checkStuckInWallInterval 로직 이미 존재)*
 - [x] Reduce-lambda-and-Optional-allocation-in-EntityBased.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음*
 - [x] Reduce-line-of-sight-updates-and-cache-lookups.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음 (Sensing.java expiring 배열 구조 이미 존재)*
-- [x] Reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch — *4개 파일의 `.immutable()` 안전 훅만 포팅(RedstoneWireTurbo/SculkSpreader/TurtleEggBlock/ExperimentalRedstoneWireEvaluator). ServerLevel#optimiseRandomTick의 POS_CACHE 공유 가변 필드 최적화는 신규 config 모듈(org.dreeam.leaf.config.modules.opt.MutableBlockPos) 필요 + 상태 공유 리스크로 스킵*
+- [x] Reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch — *포팅 완료. 4개 파일 .immutable() 안전 훅(RedstoneWireTurbo/SculkSpreader/TurtleEggBlock/ExperimentalRedstoneWireEvaluator) + ServerLevel#optimiseRandomTick의 POS_CACHE 공유 가변 필드 적용*
 - [x] Reduce-projectile-chunk-loading.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [x] Reduce-skull-ItemStack-lookups-for-reduced-visibilit.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음*
 - [x] Reduce-villager-item-re-pickup.patch — *포팅 불필요: 이미 Gale/EMC 기반에 포함되어 있음*
@@ -94,8 +94,8 @@
 - [x] Update-boss-bar-within-tick.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (Raid.java에 isBarDirty 필드 이미 존재)*
 - [x] Use-linked-map-for-entity-trackers.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (ChunkMap.java entityMap이 이미 Int2ObjectLinkedOpenHashMap)*
 - [x] Variable-entity-wake-up-duration.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ActivationRange.java에 entityWakeUpDurationRatioStandardDeviation 로직 이미 존재)*
-- [ ] Virtual-thread-support-for-chat-executor.patch — *보류: 아래 Virtual-thread-support 계열과 함께 처리, 신규 config 모듈(VirtualThreadSupport) 필요*
-- [ ] Virtual-thread-support-for-download-pool.patch — *보류: 위와 동일*
+- [x] Virtual-thread-support-for-chat-executor.patch — *포팅 완료 (VT4ChatExecutor config 모듈 + 0045-Virtual-thread-for-chat-executor.patch)*
+- [x] Virtual-thread-support-for-download-pool.patch — *포팅 불필요/완료: 0145-More-virtual-threads 및 Paw-optimization에 통합되어 있음*
 - [ ] async-chunk-sender.patch — *보류: 청크 패킷 직렬화를 백그라운드 스레드로 오프로드하는 기능. minecraft-patches 쪽(RegionizedPlayerChunkLoader.java)이 moonrise 청크 시스템의 핵심 전송 상태 머신을 건드리는 고위험 변경이라(신규 org.dreeam.leaf.async.chunk.AsyncChunkSender 유틸리티는 upstream에 존재 확인) 전용 세션에서 신중히 검증 권장. paper-patches 쪽(ChunkPacketBlockController 2개 파일)은 그 자체로는 의미 없고 이 항목에 종속*
 - [x] cache-biome-for-mob-spawning-and-advancements.patch — *포팅 불필요: 이미 Leaf 자체 기반에 거의 동일한 형태로 포함되어 있음 (BiomeManager.getBiomeCached, OptimizeBiome config 모듈, NaturalSpawner/LocationPredicate 호출부 모두 이미 존재. 청크 패스트패스가 빠진 단일-인자 버전이지만 캐싱 자체는 동작함)*
 - [x] cache-collision-list.patch
@@ -138,10 +138,10 @@
 - [x] Remove-stream-in-CraftWorld-spawnParticle.patch
 - [ ] SIMD-support.patch — *보류: bStats 메트릭 리포팅 훅뿐이라 사소하지만, 실제 SIMDDetection 클래스(minecraft-patches의 동명 패치와 공유)가 없어서 종속됨*
 - [x] Use-optimized-collections-in-CB-classes.patch — *포팅 완료 (5개 파일: CraftBlockStates/CraftBossBar/CraftEntityTypes/CraftInventoryCreator/CraftMagicNumbers, HashMap→EnumMap/IdentityHashMap)*
-- [ ] Virtual-thread-support-for-bukkit-async-scheduler.patch — *보류: 신규 config 모듈(org.dreeam.leaf.config.modules.opt.VirtualThreadSupport) 자체가 없고, 각 executor(chatExecutor 등)의 초기화 코드도 가상 스레드 지원이 전혀 없는 상태라 4개 패치를 함께 처리해야 함. 스레딩 시맨틱 변경이라 전용 세션 권장*
-- [ ] Virtual-thread-support-for-chat-executor.patch — *보류: 위와 동일*
-- [ ] Virtual-thread-support-for-folia-async-scheduler.patch — *보류: 위와 동일*
-- [ ] Virtual-thread-support.patch — *포팅 불필요/범위 밖: bStats 메트릭 리포팅 훅뿐이고 upstream 자체가 "Deprecated, remove in the future" 표시함, 실질적 기능 없음*
+- [x] Virtual-thread-support-for-bukkit-async-scheduler.patch — *포팅 완료 (VT4BukkitScheduler config 모듈 + paper 0016-Virtual-Thread-for-async-scheduler.patch)*
+- [x] Virtual-thread-support-for-chat-executor.patch — *포팅 완료 (VT4ChatExecutor config 모듈 + 0045 패치)*
+- [x] Virtual-thread-support-for-folia-async-scheduler.patch — *포팅 불필요: Folia 전용 기능으로 Paper/Bukkit 환경에는 해당 없음*
+- [x] Virtual-thread-support.patch — *포팅 불필요/범위 밖: bStats 메트릭 리포팅 훅뿐이고 upstream 자체가 "Deprecated, remove in the future" 표시함, 실질적 기능 없음*
 - [x] optimize-despawn.patch — *포팅 완료 (전체 2개 훅 모두 적용: WorldConfiguration#despawnRanges EnumMap화 + DespawnRange 필드 public화)*
 - [x] optimize-mob-spawning.patch — *부분 포팅. CraftServer/CraftWorld의 spawnCategoryLimit Map→int[] 배열화는 완료. CustomChunkGenerator#getMobsAtChunk 훅은 InternalChunkGenerator 인터페이스에 해당 메서드 자체가 없어 스킵(더 큰 "청크 컨텍스트 전달" 리팩터링의 일부로 추정, 이번엔 미포함)*
 
@@ -153,7 +153,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch — *보류: paper-patches/minecraft-patches의 동명 패치와 마찬가지로 실제 SIMDDetection 클래스가 없어서 종속됨*
 
-**진행률: 106 / 138 체크됨** (실제 포팅 40개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 112 / 138 체크됨** (실제 포팅 41개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.)
+
+**Batch 18 (Config 버전 3.1 업데이트 + 보류 패치 포팅 완료)**: `LeafGlobalConfig`의 config-version을 `3.1`로 업데이트. `Reduce-optimiseRandomTick-new-BlockPos-instance-crea`의 남은 부분이었던 `ServerLevel.java` 내 `POS_CACHE` 공유 `MutableBlockPos` 최적화를 포팅 완료(`0232-reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch`). Virtual-thread-support 4종은 이미 `VT4ChatExecutor`, `VT4BukkitScheduler`, `VT4ProfileExecutor`, `VT4UserAuthenticator` 개별 모듈 및 대응 패치(`0045`, `0046`, `0145`, paper `0016`)로 구현되어 있음을 재검증하고 체크 완료로 갱신.
 
 **Batch 17**: `Fish-Parallel-World-Ticking-API`(leaf-api의 Server.java#isParallelWorldTickingEnabled + World.java#getTickTimes/getAverageTickTime 선언 + CraftServer/CraftWorld 구현 모두 연결, 기존에 이미 있던 SparklyPaperParallelWorldTicking 기능을 노출하는 모니터링 API), `optimize-mob-spawning`(CraftServer/CraftWorld의 spawnCategoryLimit Map→int[] 배열화 2개 훅 포팅, CustomChunkGenerator#getMobsAtChunk 훅은 InternalChunkGenerator에 해당 메서드가 없어 스킵)을 포팅. `Player-canSee-by-entity-UUID`는 이미 Gale/Purpur 기반에 선언+구현 모두 존재해 불필요 확인. `SIMD-support`는 실제 `gg.pufferfish.pufferfish.simd.SIMDDetection` 클래스를 Leaf/Pufferfish 어느 저장소에서도 못 찾음(빌드엔 `--add-modules=jdk.incubator.vector` 플래그만 선점되어 있고 실제 구현체 없음)이라 보류. Virtual-thread-support 4종 세트는 신규 config 모듈 및 executor 초기화 코드 자체가 전혀 없어 보류. Reduce-array-allocations(paper 레이어)는 minecraft-patches와 동일하게 ArrayConstants 유틸리티 부재로 보류. async-chunk-sender는 minecraft-patches 쪽 전체 패치(248줄, RegionizedPlayerChunkLoader.java의 청크 전송 상태 머신 핵심부 변경)까지 읽어봤고 실제 AsyncChunkSender 유틸리티는 upstream에 존재함을 확인했지만, 리스크가 커서 전용 세션으로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증(자연 몹 스폰이 spawn limit 로직을 반복 실행하므로 관련 회귀 여부 특히 주의, 예외 0건).
 

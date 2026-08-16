@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class LeafGlobalConfig {
 
-    private static final String CURRENT_VERSION = "3.0";
+    private static final String CURRENT_VERSION = "3.1";
     private static final String CURRENT_REGION = Locale.getDefault().getCountry().toUpperCase(Locale.ROOT); // It will be in uppercase by default, just make sure
     private static final boolean isCN = CURRENT_REGION.equals("CN");
 

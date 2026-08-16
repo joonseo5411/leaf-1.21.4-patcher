@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 21:42:40 +0900
+Subject: [PATCH] reduce optimiseRandomTick new BlockPos instance create
+ (ServerLevel POS_CACHE)
+
+
+diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
+index cd93a9f9f92e263a6c200377580fa0586fc80535..42cd7ed9c09862682bb10fa9f30d2901f94f9ce7 100644
+--- a/net/minecraft/server/level/ServerLevel.java
++++ b/net/minecraft/server/level/ServerLevel.java
+@@ -1068,6 +1068,8 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+         this.players.stream().filter(LivingEntity::isSleeping).collect(Collectors.toList()).forEach(player -> player.stopSleepInBed(false, false));
+     }
+ 
++    public static final BlockPos.MutableBlockPos POS_CACHE = new BlockPos.MutableBlockPos(); // Leaf - Reduce optimiseRandomTick new BlockPos instance create
++
+     // Paper start - optimise random ticking
+     private void optimiseRandomTick(final LevelChunk chunk, final int tickSpeed) {
+         final LevelChunkSection[] sections = chunk.getSections();
+@@ -1102,8 +1104,9 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+                 final int location = tickList.getRaw(index); // Leaf - Micro optimizations for random tick - no unnecessary operations
+                 final BlockState state = states.get(location);
+ 
+-                // do not use a mutable pos, as some random tick implementations store the input without calling immutable()!
+-                final BlockPos pos = new BlockPos((location & 15) | offsetX, (location >>> (4 + 4)) | offsetY, ((location >>> 4) & 15) | offsetZ); // Leaf - Micro optimizations for random tick - no redundant mask
++                // Leaf start - Reduce optimiseRandomTick new BlockPos instance create
++                final BlockPos pos = POS_CACHE.set((location & 15) | offsetX, (location >>> (4 + 4)) | offsetY, ((location >>> 4) & 15) | offsetZ);
++                // Leaf end - Reduce optimiseRandomTick new BlockPos instance create
+ 
+                 state.randomTick(this, pos, simpleRandom); // Leaf - Micro optimizations for random tick - no redundant cast
+                 if (doubleTickFluids) {
