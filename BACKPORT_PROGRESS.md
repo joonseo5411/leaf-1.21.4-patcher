@@ -22,10 +22,10 @@
 - [x] Filter-ClientboundSetEntityMotionPacket.patch — *포팅 완료(기본값 false로 기존 동작 유지). 기존 ReduceUselessPackets config 모듈에 filterClientboundSetEntityMotionPacket 필드 추가 + ServerEntity.java 1곳(1.21.4엔 Folia 전용 두번째 tracker 경로 없어 1곳만 존재)에 적용*
 - [x] For-collision-check-has-physics-before-same-vehicle.patch — *포팅 불필요: 이미 Gale/Akarin 기반에 포함되어 있음*
 - [x] Initialize-line-of-sight-cache-with-low-capacity.patch — *포팅 불필요: 이미 상위 최적화(Reduce line of sight updates)에 흡수되어 포함되어 있음*
-- [ ] Leaves-Lithium-Sleeping-Block-Entity.patch
-- [ ] Lithium-combined-heightmap-update.patch
-- [ ] Lithium-equipment-tracking.patch
-- [ ] Lithium-faster-hash-palette.patch
+- [ ] Leaves-Lithium-Sleeping-Block-Entity.patch — *보류: 2256줄 초대형 변경 (+fixup 495줄), 전용 세션에서 처리 권장*
+- [x] Lithium-combined-heightmap-update.patch — *포팅 완료. 신규 유틸리티 클래스 net.caffeinemc.mods.lithium.common.world.chunk.heightmap.CombinedHeightmapUpdate 추가(4개 heightmap을 한 번의 top-down 스캔으로 동시 갱신), Heightmap.java에 isOpaque()/setHeight() public 접근자 추가*
+- [x] Lithium-equipment-tracking.patch — *포팅 불가: 핵심 로직이 EntityEquipment.java(535줄 중 대부분)를 대상으로 하는데 1.21.4엔 그 클래스 자체가 없음 (Replace-entity-equipment-items-to-array와 동일 사유)*
+- [ ] Lithium-faster-hash-palette.patch — *보류: 신규 LithiumHashPalette 전체 구현체(오픈 어드레싱 해시 기반 팔레트) 필요, 청크 블록 저장 압축 알고리즘이라 버그 시 월드 데이터 손상 리스크, 전용 세션에서 신중히 검증 권장*
 - [ ] Luminol-Configurable-region-format-framework.patch
 - [x] Make-EntityCollisionContext-a-live-representation.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [x] Move-random-tick-random.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (Level.java에 simpleRandom 필드 이미 존재)*
@@ -100,7 +100,7 @@
 - [x] cache-biome-for-mob-spawning-and-advancements.patch — *포팅 불필요: 이미 Leaf 자체 기반에 거의 동일한 형태로 포함되어 있음 (BiomeManager.getBiomeCached, OptimizeBiome config 모듈, NaturalSpawner/LocationPredicate 호출부 모두 이미 존재. 청크 패스트패스가 빠진 단일-인자 버전이지만 캐싱 자체는 동작함)*
 - [x] cache-collision-list.patch
 - [x] fast-bit-radix-sort.patch — *포팅 불필요: 이미 다른 형태(List<T>+Class 기반 API)로 구현되어 있음 (NearestItemSensor.itemSorter)*
-- [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
+- [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch — *보류: Leaves-Lithium-Sleeping-Block-Entity 종속, 그것과 함께 전용 세션에서 처리*
 - [x] optimize-LevelChunk-getBlockStateFinal.patch
 - [x] optimize-PalettedContainer-get.patch
 - [x] optimize-PathNavigation-followThePath.patch — *포팅 완료 (Path#getNextNode() 직접 사용으로 getNextNodePos()의 Vec3i 할당 회피)*
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 92 / 138 체크됨** (실제 포팅 32개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 94 / 138 체크됨** (실제 포팅 34개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 14**: `optimize-no-action-time`(신규 config 모듈 OptimizeNoActionTime 추가, disableLightCheck 기본값 false), `Lithium-combined-heightmap-update`(신규 유틸리티 클래스 `net.caffeinemc.mods.lithium.common.world.chunk.heightmap.CombinedHeightmapUpdate` 추가 — MOTION_BLOCKING/MOTION_BLOCKING_NO_LEAVES/OCEAN_FLOOR/WORLD_SURFACE 4개 heightmap을 한 번의 top-down 스캔으로 동시 갱신, Heightmap.java에 isOpaque()/setHeight() public 접근자 추가)를 포팅. cache-biome-for-mob-spawning-and-advancements는 이미 Leaf 자체 기반에 구현되어 있어 불필요, Replace-entity-equipment-items-to-array와 Lithium-equipment-tracking은 둘 다 1.21.4에 EntityEquipment 클래스가 없어 포팅 불가로 확인. optimize-checkInsideBlocks-calls(구버전 아키텍처), optimize-goal-selector(신규 커스텀 Set 전체 필요), thread-unsafe-chunk-map(청크 시스템 핵심 동시성 변경), Lithium-faster-hash-palette(신규 팔레트 알고리즘 전체 필요, 월드 데이터 손상 리스크), Leaves-Lithium-Sleeping-Block-Entity+fixup(2256+495줄 초대형)은 모두 고위험/대규모로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트(예외 0건) + heightmap 전용 헤드리스 봇 검증(스폰 지점 아래 단단한 지형, 낙하 없음, 주변 9개 컬럼 지형 정상)까지 통과.
 
 **Batch 13 (조사만, 신규 포팅 없음)**: cache-biome-for-mob-spawning-and-advancements는 이미 Leaf 자체 기반에 거의 동일하게 구현되어 있어 불필요로 확인, Replace-entity-equipment-items-to-array는 1.21.4엔 EntityEquipment 클래스 자체가 없어 포팅 불가로 확인. optimize-checkInsideBlocks-calls(대상 메서드 시그니처 자체가 다른 구버전 아키텍처), optimize-goal-selector(신규 커스텀 Set 구현체 전체 필요 + 몹 AI 전반 리스크), thread-unsafe-chunk-map(moonrise 청크 시스템 핵심 동시성 인프라 변경, 월드 손상 리스크)은 모두 고위험/대규모로 판단해 전용 세션으로 보류.
 
