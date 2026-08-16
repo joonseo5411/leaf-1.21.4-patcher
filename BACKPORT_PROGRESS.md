@@ -10,7 +10,7 @@
 - [ ] Better-checking-for-useless-move-packets.patch
 - [ ] Broadcast-crit-animations-as-the-entity-being-critte.patch
 - [x] Cache-ShapePairKey-hash.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Block.ShapePairKey에 hash 필드 이미 존재)*
-- [ ] Cache-block-state-tags.patch
+- [x] Cache-block-state-tags.patch
 - [x] Cache-identifier-toString-and-hash.patch
 - [x] Cache-world-border.patch — *포팅 불필요: 1.21.4 vanilla/Paper already caches it as a direct field (Level.java), so this patch does not apply*
 - [ ] Cache-world-generator-sea-level.patch
@@ -99,7 +99,7 @@
 - [ ] async-chunk-sender.patch
 - [ ] cache-biome-for-mob-spawning-and-advancements.patch
 - [x] cache-collision-list.patch
-- [ ] fast-bit-radix-sort.patch
+- [x] fast-bit-radix-sort.patch — *포팅 불필요: 이미 다른 형태(List<T>+Class 기반 API)로 구현되어 있음 (NearestItemSensor.itemSorter)*
 - [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
 - [ ] optimize-LevelChunk-getBlockStateFinal.patch
 - [ ] optimize-PalettedContainer-get.patch
@@ -107,14 +107,14 @@
 - [ ] optimize-SimpleBitStorage-object-layout.patch
 - [ ] optimize-applyMovementEmissionAndPlaySound.patch
 - [ ] optimize-attribute.patch
-- [ ] optimize-canHoldAnyFluid.patch
+- [x] optimize-canHoldAnyFluid.patch
 - [ ] optimize-checkInsideBlocks-calls.patch
 - [ ] optimize-collidedAlongVector.patch
 - [ ] optimize-collision-shape.patch
 - [ ] optimize-get-chunk.patch
-- [ ] optimize-getOnPos.patch
+- [x] optimize-getOnPos.patch
 - [ ] optimize-goal-selector.patch
-- [ ] optimize-isStateClimbable.patch
+- [x] optimize-isStateClimbable.patch
 - [ ] optimize-mob-despawn.patch
 - [ ] optimize-movement-vector-normalization.patch
 - [ ] optimize-no-action-time.patch
@@ -151,11 +151,9 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 51 / 138 체크됨** (실제 포팅 16개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 56 / 138 체크됨** (실제 포팅 20개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
 
-**다음 세션 우선순위 (Phase 2, 인프라 필요)**: 아래 항목들은 'Cache-block-state-tags' 패치(BlockState에 tagFlag/pathType 캐시 필드 + org.dreeam.leaf.util.BlockMasks 유틸리티 추가)가 선행되어야 포팅 가능함. 이 패치 하나를 먼저 신중히 작업하면 최소 4개 패치가 연쇄적으로 풀림:
-- Cache-block-state-tags (기반 패치, 코어 블록 상태 시스템 광범위 변경 — 신중한 검토 필요)
-- optimize-getOnPos, optimize-isStateClimbable, optimize-canHoldAnyFluid (전부 tagFlag 의존)
+**Phase 2 완료**: `Cache-block-state-tags` 기반 패치(BlockState에 `tagFlag` 캐시 필드 + `org.dreeam.leaf.util.BlockMasks` 유틸리티 추가; `pathType` 캐시는 1.21.4에 이미 별도로 존재해서 손댈 필요 없었음)를 실제로 포팅해서 `optimize-getOnPos`, `optimize-isStateClimbable`, `optimize-canHoldAnyFluid` 3개를 추가로 풀었음. 펜스/벽/펜스게이트/사다리/가루눈/트랩도어/덩굴/유체/가마솥 상호작용을 헤드리스 봇으로 전부 실전 테스트, 예외 0건.
 
 기타 보류: Optimize-respawn-anchor-explosion(getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(신규 config 모듈 + Leaves ServerPhotographer 필요), Rewrite-entity-despawn-time(엔티티 생명주기+청크시스템 광범위 변경), optimize-attribute(AttributeInstanceArrayMap 등 대규모 신규 컬렉션 인프라 필요)**
 

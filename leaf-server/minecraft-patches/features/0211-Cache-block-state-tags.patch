@@ -1,0 +1,89 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:56:01 +0900
+Subject: [PATCH] Cache block state tags
+
+Add a tagFlag bitmask field to BlockStateBase, precomputed once at
+server startup (alongside the existing pathType cache) via a new
+org.dreeam.leaf.util.BlockMasks helper, covering: wall/fence/climbable/
+cauldron tags, powder snow / fence gate / trapdoor(+open) block
+instance checks, and water/lava/canHoldAnyFluid fluid state. Wire up
+DismountHelper#nonClimbableShape to use it instead of two separate
+tag/instanceof lookups per call.
+
+Backported from Leaf ver/26.2 (original author: hayanesuru) to
+ver/1.21.4. 1.21.4 already had an equivalent pathType cache under a
+prior 'Cache path type' patch (object-cached rather than byte-index
+cached); this only adds the tagFlag half, which was missing. Omits
+the CAN_GLIDE_THROUGH_TAG bit from upstream's BlockMasks since that
+block tag doesn't exist in 1.21.4.
+
+diff --git a/net/minecraft/server/dedicated/DedicatedServer.java b/net/minecraft/server/dedicated/DedicatedServer.java
+index 0b5858ae29269fb9f8516aaa95941ebb4d4915e4..fcfd6c5066ba6c1865d91fc02344e646d1649b9d 100644
+--- a/net/minecraft/server/dedicated/DedicatedServer.java
++++ b/net/minecraft/server/dedicated/DedicatedServer.java
+@@ -419,6 +419,7 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface
+ 
+             if (org.dreeam.leaf.config.modules.async.AsyncMobSpawning.enabled) mobSpawnExecutor.start(); // Pufferfish
+             net.minecraft.world.level.block.Blocks.initPathType(); // Leaf - Cache path type
++            net.minecraft.world.level.block.Blocks.initTagFlag(); // Leaf - Cache block state tags
+             org.purpurmc.purpur.task.BossBarTask.startAll(); // Purpur - Implement TPSBar
+             if (org.purpurmc.purpur.PurpurConfig.beeCountPayload) org.purpurmc.purpur.task.BeehiveTask.instance().register(); // Purpur - Give bee counts in beehives to Purpur clients
+             return true;
+diff --git a/net/minecraft/world/entity/vehicle/DismountHelper.java b/net/minecraft/world/entity/vehicle/DismountHelper.java
+index cc990bdfc9609ecba5607c9c8bcfec8b0e08e01e..c426a3ab23e7fd6310065050f75950c9bf6a8dc8 100644
+--- a/net/minecraft/world/entity/vehicle/DismountHelper.java
++++ b/net/minecraft/world/entity/vehicle/DismountHelper.java
+@@ -54,7 +54,7 @@ public class DismountHelper {
+ 
+     public static VoxelShape nonClimbableShape(BlockGetter level, BlockPos pos) {
+         BlockState blockState = level.getBlockState(pos);
+-        return !blockState.is(BlockTags.CLIMBABLE) && (!(blockState.getBlock() instanceof TrapDoorBlock) || !blockState.getValue(TrapDoorBlock.OPEN))
++        return ((blockState.tagFlag & (org.dreeam.leaf.util.BlockMasks.TRAP_DOOR_CL_OPEN | org.dreeam.leaf.util.BlockMasks.CLIMBABLE_TAG)) == 0) // Leaf - Cache block state tags
+             ? blockState.getCollisionShape(level, pos)
+             : Shapes.empty();
+     }
+diff --git a/net/minecraft/world/level/block/Blocks.java b/net/minecraft/world/level/block/Blocks.java
+index c5840aad8b6a719873b06a6c5e30cba35555656f..4173638359f05ff9a69523e8380f9c8621f0f7d1 100644
+--- a/net/minecraft/world/level/block/Blocks.java
++++ b/net/minecraft/world/level/block/Blocks.java
+@@ -6964,4 +6964,14 @@ public class Blocks {
+         }
+     }
+     // Leaf end - Cache path type
++
++    // Leaf start - Cache block state tags
++    public static void initTagFlag() {
++        for (Block block : BuiltInRegistries.BLOCK) {
++            for (BlockState blockState : block.getStateDefinition().getPossibleStates()) {
++                blockState.initTagFlag();
++            }
++        }
++    }
++    // Leaf end - Cache block state tags
+ }
+diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
+index d498ee864362e378c430d0d2916d76cf8e69f069..74ebb17f881546f5c90ebbf59b2cdf1ff111ad3d 100644
+--- a/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -477,6 +477,7 @@ public abstract class BlockBehaviour implements FeatureElement {
+         private boolean emptyConstantCollisionShape;
+         private VoxelShape constantCollisionShape;
+         public net.minecraft.world.level.pathfinder.PathType pathType; // Leaf - Cache path type
++        public int tagFlag; // Leaf - Cache block state tags
+ 
+         private static void initCaches(final VoxelShape shape, final boolean neighbours) {
+             ((ca.spottedleaf.moonrise.patches.collisions.shape.CollisionVoxelShape)shape).moonrise$isFullBlock();
+@@ -652,6 +653,12 @@ public abstract class BlockBehaviour implements FeatureElement {
+         }
+         // Leaf end - Cache path type
+ 
++        // Leaf start - Cache block state tags
++        public void initTagFlag() {
++            tagFlag = org.dreeam.leaf.util.BlockMasks.init(this.asState());
++        }
++        // Leaf end - Cache block state tags
++
+         public Block getBlock() {
+             return this.owner;
+         }

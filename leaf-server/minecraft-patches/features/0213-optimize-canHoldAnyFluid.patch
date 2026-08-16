@@ -1,0 +1,27 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:57:04 +0900
+Subject: [PATCH] optimize canHoldAnyFluid
+
+Replace the canHoldAnyFluid(BlockState) call in
+FlowingFluid#canMaybePassThrough with a cached tagFlag bit check.
+(The other canHoldFluid() call site already had an equivalent
+per-state lazy cache from an earlier 'Cache part of canHoldFluid
+result' patch, left as-is.)
+
+Backported from Leaf ver/26.2 (original author: hayanesuru) to
+ver/1.21.4.
+
+diff --git a/net/minecraft/world/level/material/FlowingFluid.java b/net/minecraft/world/level/material/FlowingFluid.java
+index 5069006c609f43559cf241fd5267a1f52f7d9680..c68eaf9ff50c66950d96c2daec14f284dbc4cd61 100644
+--- a/net/minecraft/world/level/material/FlowingFluid.java
++++ b/net/minecraft/world/level/material/FlowingFluid.java
+@@ -475,7 +475,7 @@ public abstract class FlowingFluid extends Fluid {
+         BlockGetter level, BlockPos pos, BlockState state, Direction direction, BlockPos spreadPos, BlockState spreadState, FluidState fluidState
+     ) {
+         return !this.isSourceBlockOfThisType(fluidState)
+-            && canHoldAnyFluid(spreadState)
++            && (spreadState.tagFlag & org.dreeam.leaf.util.BlockMasks.CAN_HOLD_ANY_FLUID) != 0 // Leaf - optimize canHoldAnyFluid
+             && canPassThroughWall(direction, level, pos, state, spreadPos, spreadState);
+     }
+ 
