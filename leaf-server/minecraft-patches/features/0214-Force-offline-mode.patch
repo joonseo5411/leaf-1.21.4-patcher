@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 16:52:33 +0900
+Subject: [PATCH] Force offline mode
+
+Hardcode onlineMode to false regardless of the online-mode value in
+server.properties. This build is intended to run exclusively behind
+a Velocity proxy with modern forwarding, so the property is no longer
+read - it's ignored entirely rather than left as a footgun that could
+silently break Velocity forwarding auth if someone flips it to true.
+
+Custom patch for this fork, not from upstream Leaf.
+
+diff --git a/net/minecraft/server/dedicated/DedicatedServerProperties.java b/net/minecraft/server/dedicated/DedicatedServerProperties.java
+index 4a0eed7d7645ed539857592d233214e9a74499f1..96c34bbe368b831715497bf22ac836598a118cf6 100644
+--- a/net/minecraft/server/dedicated/DedicatedServerProperties.java
++++ b/net/minecraft/server/dedicated/DedicatedServerProperties.java
+@@ -46,7 +46,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
+     private static final Pattern SHA1 = Pattern.compile("^[a-fA-F0-9]{40}$");
+     private static final Splitter COMMA_SPLITTER = Splitter.on(',').trimResults();
+     public final boolean debug = this.get("debug", false); // CraftBukkit
+-    public final boolean onlineMode = this.get("online-mode", true);
++    public final boolean onlineMode = false; // Leaf - Force offline mode (server.properties online-mode value is ignored; this build is Velocity-only)
+     public final boolean preventProxyConnections = this.get("prevent-proxy-connections", false);
+     public final String serverIp = this.get("server-ip", "");
+     public final String serverName = this.get("server-name", "Unknown Server"); // Purpur - Bring back server name
