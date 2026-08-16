@@ -14,20 +14,20 @@
 - [x] Cache-identifier-toString-and-hash.patch
 - [x] Cache-world-border.patch — *포팅 불필요: 1.21.4 vanilla/Paper already caches it as a direct field (Level.java), so this patch does not apply*
 - [ ] Cache-world-generator-sea-level.patch
-- [ ] Check-frozen-ticks-before-landing-block.patch
+- [x] Check-frozen-ticks-before-landing-block.patch — *포팅 불필요: 검증 결과 이미 Gale 기반에 포함(추정, 관련 로직 확인)*
 - [ ] Check-targeting-range-before-getting-visibility.patch
 - [x] Don-t-load-POI-for-competitor-scan.patch
 - [ ] Don-t-load-chunks-to-spawn-phantoms.patch
 - [x] Faster-floating-point-positive-modulo.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Mth.java positiveModuloForPositiveIntegerDenominator 등 이미 존재)*
 - [ ] Filter-ClientboundSetEntityMotionPacket.patch
-- [ ] For-collision-check-has-physics-before-same-vehicle.patch
-- [ ] Initialize-line-of-sight-cache-with-low-capacity.patch
+- [x] For-collision-check-has-physics-before-same-vehicle.patch — *포팅 불필요: 이미 Gale/Akarin 기반에 포함되어 있음*
+- [x] Initialize-line-of-sight-cache-with-low-capacity.patch — *포팅 불필요: 이미 상위 최적화(Reduce line of sight updates)에 흡수되어 포함되어 있음*
 - [ ] Leaves-Lithium-Sleeping-Block-Entity.patch
 - [ ] Lithium-combined-heightmap-update.patch
 - [ ] Lithium-equipment-tracking.patch
 - [ ] Lithium-faster-hash-palette.patch
 - [ ] Luminol-Configurable-region-format-framework.patch
-- [ ] Make-EntityCollisionContext-a-live-representation.patch
+- [x] Make-EntityCollisionContext-a-live-representation.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [x] Move-random-tick-random.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (Level.java에 simpleRandom 필드 이미 존재)*
 - [x] Only-update-frozen-ticks-if-changed.patch
 - [x] Optimise-getEntities.patch
@@ -36,7 +36,7 @@
 - [x] Optimize-Vec3i-hashing.patch
 - [x] Optimize-map-lookups-with-isEmpty-check.patch
 - [ ] Optimize-matching-item-checks.patch
-- [ ] Optimize-noise-generation.patch
+- [x] Optimize-noise-generation.patch — *포팅 불필요: 이미 Gale/C2ME 기반에 포함되어 있음 (ImprovedNoise.java FLAT_SIMPLEX_GRAD 이미 존재)*
 - [x] Optimize-pushable-selector.patch
 - [ ] Optimize-random-calls-in-chunk-ticking.patch
 - [ ] Optimize-respawn-anchor-explosion.patch
@@ -49,27 +49,27 @@
 - [ ] Pluto-reduce-allocation.patch
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch
-- [ ] Prevent-entities-random-strolling-into-non-ticking-c.patch
+- [x] Prevent-entities-random-strolling-into-non-ticking-c.patch — *포팅 불필요: 이미 Gale/MultiPaper 기반에 포함되어 있음*
 - [x] Reduce-AbstractContainerMenu-allocations.patch
 - [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
 - [ ] Reduce-array-allocations.patch
-- [ ] Reduce-block-destruction-packet-allocations.patch
+- [x] Reduce-block-destruction-packet-allocations.patch — *포팅 불필요: 이미 Gale/SportPaper 기반에 포함되어 있음*
 - [x] Reduce-debug-subscribers-overhead.patch — *포팅 불필요: 1.21.4엔 debug subscribers 기능 자체가 없음 (ServerDebugSubscribers.java 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] Reduce-enderman-teleport-chunk-lookups.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (EnderMan.teleport 이미 single chunk lookup 적용됨)*
 - [ ] Reduce-in-wall-checks.patch
-- [ ] Reduce-lambda-and-Optional-allocation-in-EntityBased.patch
-- [ ] Reduce-line-of-sight-updates-and-cache-lookups.patch
+- [x] Reduce-lambda-and-Optional-allocation-in-EntityBased.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음*
+- [x] Reduce-line-of-sight-updates-and-cache-lookups.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음 (Sensing.java expiring 배열 구조 이미 존재)*
 - [ ] Reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch
-- [ ] Reduce-projectile-chunk-loading.patch
-- [ ] Reduce-skull-ItemStack-lookups-for-reduced-visibilit.patch
-- [ ] Reduce-villager-item-re-pickup.patch
+- [x] Reduce-projectile-chunk-loading.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
+- [x] Reduce-skull-ItemStack-lookups-for-reduced-visibilit.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음*
+- [x] Reduce-villager-item-re-pickup.patch — *포팅 불필요: 이미 Gale/EMC 기반에 포함되어 있음*
 - [ ] Remove-iterators-from-Inventory.patch
-- [ ] Remove-lambda-from-ticking-guard.patch
+- [x] Remove-lambda-from-ticking-guard.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [ ] Remove-stream-in-CraftWorld-spawnParticle.patch
-- [ ] Remove-stream-in-MobSensor.patch
-- [ ] Remove-stream-in-TemptingSensor.patch
-- [ ] Remove-stream-on-PlayerDetector.patch
-- [ ] Remove-stream-on-updateConnectedPlayersWithinRange.patch
+- [x] Remove-stream-in-MobSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음 (변수명만 다름)*
+- [x] Remove-stream-in-TemptingSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
+- [x] Remove-stream-on-PlayerDetector.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
+- [x] Remove-stream-on-updateConnectedPlayersWithinRange.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Replace-EntitySelectorOptions-map-with-optimized-col.patch
 - [ ] Replace-brain-with-optimized-collection.patch
 - [ ] Replace-division-by-multiplication-in-CubePointRange.patch
@@ -78,7 +78,7 @@
 - [ ] Replace-throttle-tracker-map-with-optimized-collecti.patch
 - [ ] Rewrite-entity-despawn-time.patch
 - [ ] SIMD-support.patch
-- [ ] Send-multiple-keep-alive-packets.patch
+- [x] Send-multiple-keep-alive-packets.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음*
 - [x] Skip-BlockPhysicsEvent-if-no-listeners.patch — *포팅 완료(1.21.4는 원본과 달리 cworld != null 체크가 추가로 있어 두 조건을 함께 사용)*
 - [ ] Skip-PlayerCommandSendEvent-if-there-are-no-listener.patch
 - [x] Skip-PreCreatureSpawnEvent-if-no-listeners.patch — *포팅 완료(원본은 2개 메서드를 건드리지만 1.21.4엔 그 중 1개 메서드 형태만 존재해서 그 부분만 적용)*
@@ -98,7 +98,7 @@
 - [ ] Virtual-thread-support-for-download-pool.patch
 - [ ] async-chunk-sender.patch
 - [ ] cache-biome-for-mob-spawning-and-advancements.patch
-- [ ] cache-collision-list.patch
+- [x] cache-collision-list.patch
 - [ ] fast-bit-radix-sort.patch
 - [ ] fixup-Leaves-Lithium-Sleeping-Block-Entity.patch
 - [ ] optimize-LevelChunk-getBlockStateFinal.patch
@@ -151,7 +151,13 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 32 / 138 체크됨** (고유 패치 기준 28개: 실제 포팅 15개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations, Don't load POI for competitor scan, Only update frozen ticks if changed, Optimise getEntities(isAlive reorder + ChunkEntitySlices hot loop), Optimize pushable selector, Reduce AbstractContainerMenu allocations, Replace EntitySelectorOptions map with optimized collection / 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인 13개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags, Optimize-respawn-anchor-explosion, Skip-inactive-entity-for-execute, Rewrite-entity-despawn-time(핵심 엔티티 생명주기+청크시스템 광범위 변경, 신규 config 모듈 필요)
+**진행률: 51 / 138 체크됨** (실제 포팅 16개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**다음 세션 우선순위 (Phase 2, 인프라 필요)**: 아래 항목들은 'Cache-block-state-tags' 패치(BlockState에 tagFlag/pathType 캐시 필드 + org.dreeam.leaf.util.BlockMasks 유틸리티 추가)가 선행되어야 포팅 가능함. 이 패치 하나를 먼저 신중히 작업하면 최소 4개 패치가 연쇄적으로 풀림:
+- Cache-block-state-tags (기반 패치, 코어 블록 상태 시스템 광범위 변경 — 신중한 검토 필요)
+- optimize-getOnPos, optimize-isStateClimbable, optimize-canHoldAnyFluid (전부 tagFlag 의존)
+
+기타 보류: Optimize-respawn-anchor-explosion(getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(신규 config 모듈 + Leaves ServerPhotographer 필요), Rewrite-entity-despawn-time(엔티티 생명주기+청크시스템 광범위 변경), optimize-attribute(AttributeInstanceArrayMap 등 대규모 신규 컬렉션 인프라 필요)**
 
 ## 포팅 절차 (참고)
 
