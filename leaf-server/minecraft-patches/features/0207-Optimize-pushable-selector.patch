@@ -1,0 +1,40 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:35:16 +0900
+Subject: [PATCH] Optimize pushable selector
+
+Avoid the duplicated Bukkit#isPushable-equivalent check and the extra
+NO_SPECTATORS.and() Predicate wrapper allocation; inline the
+spectator check directly into the pushable-collision lambda.
+
+Backported from Leaf ver/26.2 (original author: OverwriteMC) to
+ver/1.21.4. This version already has Paper's Climbing-should-not-
+bypass-cramming-gamerule change (isCollidable(ignoreClimbing) instead
+of isPushable()), so the inlined check targets that condition instead.
+
+diff --git a/net/minecraft/world/entity/EntitySelector.java b/net/minecraft/world/entity/EntitySelector.java
+index d2ca99f8b5ad46c59b663cd56f3ee2bd66185381..75bcde0f01490bd0e8e4441f10a988bd2496da7a 100644
+--- a/net/minecraft/world/entity/EntitySelector.java
++++ b/net/minecraft/world/entity/EntitySelector.java
+@@ -54,9 +54,8 @@ public final class EntitySelector {
+         Team.CollisionRule collisionRule = team == null ? Team.CollisionRule.ALWAYS : team.getCollisionRule();
+         return (Predicate<Entity>)(collisionRule == Team.CollisionRule.NEVER
+             ? Predicates.alwaysFalse()
+-            : NO_SPECTATORS.and(
+-            pushedEntity -> {
+-                if (!pushedEntity.isCollidable(ignoreClimbing) || !pushedEntity.canCollideWithBukkit(entity) || !entity.canCollideWithBukkit(pushedEntity)) { // CraftBukkit - collidable API // Paper - Climbing should not bypass cramming gamerule
++            : (Predicate<Entity>) pushedEntity -> { // Leaf - optimize pushable selector
++                if (pushedEntity.isSpectator() || !pushedEntity.isCollidable(ignoreClimbing) || !pushedEntity.canCollideWithBukkit(entity) || !entity.canCollideWithBukkit(pushedEntity)) { // CraftBukkit - collidable API // Paper - Climbing should not bypass cramming gamerule // Leaf - optimize pushable selector
+                     return false;
+                 } else if (!entity.level().isClientSide || pushedEntity instanceof Player && ((Player)pushedEntity).isLocalPlayer()) {
+                     Team team1 = pushedEntity.getTeam();
+@@ -71,8 +70,7 @@ public final class EntitySelector {
+                 } else {
+                     return false;
+                 }
+-            }
+-        ));
++            }); // Leaf - optimize pushable selector
+     }
+ 
+     public static Predicate<Entity> notRiding(Entity entity) {

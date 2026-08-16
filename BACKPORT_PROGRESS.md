@@ -37,7 +37,7 @@
 - [x] Optimize-map-lookups-with-isEmpty-check.patch
 - [ ] Optimize-matching-item-checks.patch
 - [ ] Optimize-noise-generation.patch
-- [ ] Optimize-pushable-selector.patch
+- [x] Optimize-pushable-selector.patch
 - [ ] Optimize-random-calls-in-chunk-ticking.patch
 - [ ] Optimize-respawn-anchor-explosion.patch
 - [x] Optimize-sheep-offspring-color.patch — *포팅 불필요: 이미 Gale/carpet-fixes 기반에 포함되어 있음 (DyeColor.getMixedColor 이미 최적화됨)*
@@ -50,7 +50,7 @@
 - [x] Pre-compute-VarLong-sizes.patch — *포팅 불필요: 이미 Gale 기반에 동일 최적화가 포함되어 있음*
 - [ ] Prevent-entities-from-moving-into-weak-loaded-chunks.patch
 - [ ] Prevent-entities-random-strolling-into-non-ticking-c.patch
-- [ ] Reduce-AbstractContainerMenu-allocations.patch
+- [x] Reduce-AbstractContainerMenu-allocations.patch
 - [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
 - [ ] Reduce-array-allocations.patch
 - [ ] Reduce-block-destruction-packet-allocations.patch
@@ -70,7 +70,7 @@
 - [ ] Remove-stream-in-TemptingSensor.patch
 - [ ] Remove-stream-on-PlayerDetector.patch
 - [ ] Remove-stream-on-updateConnectedPlayersWithinRange.patch
-- [ ] Replace-EntitySelectorOptions-map-with-optimized-col.patch
+- [x] Replace-EntitySelectorOptions-map-with-optimized-col.patch
 - [ ] Replace-brain-with-optimized-collection.patch
 - [ ] Replace-division-by-multiplication-in-CubePointRange.patch
 - [ ] Replace-entity-equipment-items-to-array.patch
@@ -151,7 +151,7 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 29 / 138 체크됨** (고유 패치 기준 25개: 실제 포팅 12개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations, Don't load POI for competitor scan, Only update frozen ticks if changed, Optimise getEntities(isAlive reorder + ChunkEntitySlices hot loop) / 이미 각종 서드파티 포크(Gale·Patina·Airplane·Pufferfish·JettPack·carpet-fixes·VMP·Lithium·Mirai) 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인 13개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags(코어 블록 상태 시스템 광범위 변경), Optimize-respawn-anchor-explosion(1.21.4에 없는 getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(1.21.4에 없는 Leaf config 모듈 + Leaves ServerPhotographer 클래스 전제)
+**진행률: 32 / 138 체크됨** (고유 패치 기준 28개: 실제 포팅 15개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations, Don't load POI for competitor scan, Only update frozen ticks if changed, Optimise getEntities(isAlive reorder + ChunkEntitySlices hot loop), Optimize pushable selector, Reduce AbstractContainerMenu allocations, Replace EntitySelectorOptions map with optimized collection / 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인 13개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags, Optimize-respawn-anchor-explosion, Skip-inactive-entity-for-execute, Rewrite-entity-despawn-time(핵심 엔티티 생명주기+청크시스템 광범위 변경, 신규 config 모듈 필요)
 
 ## 포팅 절차 (참고)
 

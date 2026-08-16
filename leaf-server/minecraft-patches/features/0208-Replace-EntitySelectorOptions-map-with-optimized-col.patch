@@ -1,0 +1,32 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:35:16 +0900
+Subject: [PATCH] Replace EntitySelectorOptions map with optimized collection
+
+Use fastutil's Object2ObjectOpenHashMap instead of java.util.HashMap
+for the @e[scores=...] selector option's bounds map.
+
+Backported from Leaf ver/26.2 (original author: HaHaWTH) to ver/1.21.4.
+
+diff --git a/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java b/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java
+index f6b58139aace70436034f0a16370236d975cb4ae..774bd7e31c771c970bbf151d4706301f73aac9e7 100644
+--- a/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java
++++ b/net/minecraft/commands/arguments/selector/options/EntitySelectorOptions.java
+@@ -351,7 +351,7 @@ public class EntitySelectorOptions {
+             }, entitySelectorParser -> true, Component.translatable("argument.entity.options.nbt.description"));
+             register("scores", parser -> {
+                 StringReader reader = parser.getReader();
+-                Map<String, MinMaxBounds.Ints> map = Maps.newHashMap();
++                it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap<String, MinMaxBounds.Ints> map = new it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap<>(); // Leaf - Replace options map with optimized collection
+                 reader.expect('{');
+                 reader.skipWhitespace();
+ 
+@@ -374,7 +374,7 @@ public class EntitySelectorOptions {
+                     parser.addPredicate(entity -> {
+                         Scoreboard scoreboard = entity.getServer().getScoreboard();
+ 
+-                        for (Entry<String, MinMaxBounds.Ints> entry : map.entrySet()) {
++                        for (Entry<String, MinMaxBounds.Ints> entry : map.object2ObjectEntrySet()) { // Leaf - Replace options map with optimized collection
+                             Objective objective = scoreboard.getObjective(entry.getKey());
+                             if (objective == null) {
+                                 return false;

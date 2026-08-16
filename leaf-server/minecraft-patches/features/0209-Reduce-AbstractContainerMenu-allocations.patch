@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:35:25 +0900
+Subject: [PATCH] Reduce AbstractContainerMenu allocations
+
+Replace the per-slot Suppliers.memoize(item::copy) allocation in
+broadcastChanges() (runs every tick, per slot) with a single reused
+CachedItemStackSupplier field that's reset() per slot instead of
+reallocated.
+
+Backported from Leaf ver/26.2 (original author: HaHaWTH) to ver/1.21.4.
+
+diff --git a/net/minecraft/world/inventory/AbstractContainerMenu.java b/net/minecraft/world/inventory/AbstractContainerMenu.java
+index 59ab331604096427fd0c2bbe920782c291363f3a..5dfff0f94185910c4d7cc958e0465476f106e8c5 100644
+--- a/net/minecraft/world/inventory/AbstractContainerMenu.java
++++ b/net/minecraft/world/inventory/AbstractContainerMenu.java
+@@ -230,12 +230,15 @@ public abstract class AbstractContainerMenu {
+         return list;
+     }
+ 
++    private final org.dreeam.leaf.util.cache.CachedItemStackSupplier broadcastCarried = new org.dreeam.leaf.util.cache.CachedItemStackSupplier(); // Leaf - Reduce AbstractContainerMenu allocations
+     public void broadcastChanges() {
+         for (int i = 0; i < this.slots.size(); i++) {
+             ItemStack item = this.slots.get(i).getItem();
+-            Supplier<ItemStack> supplier = Suppliers.memoize(item::copy);
+-            this.triggerSlotListeners(i, item, supplier);
+-            this.synchronizeSlotToRemote(i, item, supplier);
++            // Leaf start - Reduce AbstractContainerMenu allocations
++            this.broadcastCarried.reset(item);
++            this.triggerSlotListeners(i, item, this.broadcastCarried);
++            this.synchronizeSlotToRemote(i, item, this.broadcastCarried);
++            // Leaf end - Reduce AbstractContainerMenu allocations
+         }
+ 
+         this.synchronizeCarriedToRemote();
