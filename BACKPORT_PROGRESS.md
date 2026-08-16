@@ -83,14 +83,14 @@
 - [ ] Skip-PlayerCommandSendEvent-if-there-are-no-listener.patch
 - [x] Skip-PreCreatureSpawnEvent-if-no-listeners.patch — *포팅 완료(원본은 2개 메서드를 건드리지만 1.21.4엔 그 중 1개 메서드 형태만 존재해서 그 부분만 적용)*
 - [x] Skip-VehicleEntityCollisionEvent-if-no-listeners.patch
-- [ ] Skip-cloning-advancement-criteria.patch
-- [ ] Skip-entity-move-if-movement-is-zero.patch
+- [x] Skip-cloning-advancement-criteria.patch — *포팅 불필요: 이미 Gale/Mirai 기반에 포함되어 있음 (Advancement 레코드 압축 생성자에 이미 적용됨)*
+- [x] Skip-entity-move-if-movement-is-zero.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (Entity.java에 boundingBoxChanged 필드 이미 존재)*
 - [ ] Skip-inactive-entity-for-execute.patch
-- [ ] Skip-item-merge-checks-for-full-stacks.patch
+- [x] Skip-item-merge-checks-for-full-stacks.patch
 - [ ] Skip-negligible-planar-movement-multiplication.patch
-- [ ] Skip-secondary-POI-sensor-if-absent.patch
+- [x] Skip-secondary-POI-sensor-if-absent.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (SecondaryPoiSensor.java에 이미 적용됨)*
 - [ ] Spread-out-sending-all-player-info.patch
-- [ ] Store-mob-counts-in-an-array.patch
+- [x] Store-mob-counts-in-an-array.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (LocalMobCapCalculator.java에 int[] counts 이미 존재)*
 - [ ] Update-boss-bar-within-tick.patch
 - [ ] Use-linked-map-for-entity-trackers.patch
 - [ ] Variable-entity-wake-up-duration.patch
@@ -120,7 +120,7 @@
 - [ ] optimize-no-action-time.patch
 - [ ] optimize-tickEffects.patch
 - [ ] optimize-waypoint.patch
-- [ ] reduce-enchantment-allocations.patch
+- [x] reduce-enchantment-allocations.patch
 - [ ] remove-shouldTickBlocksAt-check.patch
 - [ ] rewrite-InsideBrownianWalk.patch
 - [ ] thread-unsafe-chunk-map.patch
@@ -151,7 +151,7 @@
 - [ ] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 18 / 138 체크됨** (고유 패치 기준 16개: 실제 포팅 7개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent if no listeners / 이미 Gale·Patina·Airplane·Pufferfish·JettPack·carpet-fixes 기반에 구현되어 있어 포팅 불필요로 확인 9개 — Cache world border, Faster floating-point positive modulo, Move random tick random, Optimize VarInt/VarLong write, Optimize sheep offspring color, Optimize sun burn tick, Pre-compute VarLong sizes, Reduce RandomSource instances, Reduce enderman teleport chunk lookups. 일부는 minecraft-patches·paper-patches 두 섹션에 동시 등장해 체크 줄 수는 18줄. 보류(추후 검토 필요, 미체크): Cache-block-state-tags(코어 블록 상태 시스템 광범위 변경), Optimize-respawn-anchor-explosion(1.21.4에 없는 getFluidStateIfLoadedUnchecked 헬퍼 필요)
+**진행률: 24 / 138 체크됨** (고유 패치 기준 20개: 실제 포팅 9개 — Vec3i hashing, Cache identifier toString/hash, Optimize map lookups with isEmpty check, Optimize PatchedDataComponentMap equals, Skip BlockPhysicsEvent/PreCreatureSpawnEvent/VehicleEntityCollisionEvent/item-merge-for-full-stacks if no listeners, reduce enchantment allocations / 이미 각종 서드파티 포크(Gale·Patina·Airplane·Pufferfish·JettPack·carpet-fixes·VMP·Lithium·Mirai) 기반에 구현되어 있어 포팅 불필요로 확인 11개. 보류(추후 검토 필요, 미체크): Cache-block-state-tags(코어 블록 상태 시스템 광범위 변경), Optimize-respawn-anchor-explosion(1.21.4에 없는 getFluidStateIfLoadedUnchecked 헬퍼 필요), Skip-inactive-entity-for-execute(1.21.4에 없는 Leaf config 모듈 + Leaves ServerPhotographer 클래스 전제)
 
 ## 포팅 절차 (참고)
 

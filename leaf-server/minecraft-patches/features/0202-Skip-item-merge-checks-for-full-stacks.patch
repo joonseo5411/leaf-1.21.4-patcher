@@ -1,0 +1,54 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 14:22:15 +0900
+Subject: [PATCH] Skip item merge checks for full stacks
+
+Break out of the neighbour-merge loop early once this item's stack is
+already full (or removed), instead of only checking after each merge
+attempt. Also avoid re-fetching getItem() repeatedly per iteration by
+threading the already-read ItemStacks through tryToMerge.
+
+Backported from Leaf ver/26.2 (original author: nostalfinals) to
+ver/1.21.4.
+
+diff --git a/net/minecraft/world/entity/item/ItemEntity.java b/net/minecraft/world/entity/item/ItemEntity.java
+index 280d9d5a23f5fc8560ca8eeb4f3652ea9c1505b2..d41935fc62295d7c161ee9f701d2cc662a005698 100644
+--- a/net/minecraft/world/entity/item/ItemEntity.java
++++ b/net/minecraft/world/entity/item/ItemEntity.java
+@@ -292,6 +292,12 @@ public class ItemEntity extends Entity implements TraceableEntity {
+             double radius = this.level().spigotConfig.itemMerge; // Spigot
+             for (ItemEntity itemEntity : this.level()
+                 .getEntitiesOfClass(ItemEntity.class, this.getBoundingBox().inflate(radius, this.level().paperConfig().entities.behavior.onlyMergeItemsHorizontally ? 0 : radius - 0.5D, radius), neighbour -> neighbour != this && neighbour.isMergable())) { // Spigot // Paper - configuration to only merge items horizontally
++                // Leaf start - Skip item merge checks for full stacks
++                final ItemStack thisItem = this.getItem();
++                if (this.isRemoved() || thisItem.getCount() >= thisItem.getMaxStackSize()) {
++                    break;
++                }
++                // Leaf end - Skip item merge checks for full stacks
+                 if (itemEntity.isMergable()) {
+                     // Paper start - Fix items merging through walls
+                     if (this.level().paperConfig().fixes.fixItemsMergingThroughWalls) {
+@@ -301,10 +307,7 @@ public class ItemEntity extends Entity implements TraceableEntity {
+                         }
+                     }
+                     // Paper end - Fix items merging through walls
+-                    this.tryToMerge(itemEntity);
+-                    if (this.isRemoved()) {
+-                        break;
+-                    }
++                    this.tryToMerge(itemEntity, thisItem, itemEntity.getItem()); // Leaf - Skip item merge checks for full stacks
+                 }
+             }
+         }
+@@ -318,6 +321,11 @@ public class ItemEntity extends Entity implements TraceableEntity {
+     private void tryToMerge(ItemEntity itemEntity) {
+         ItemStack item = this.getItem();
+         ItemStack item1 = itemEntity.getItem();
++        // Leaf start - Skip item merge checks for full stacks
++        tryToMerge(itemEntity, item, item1);
++    }
++    private void tryToMerge(ItemEntity itemEntity, ItemStack item, ItemStack item1) {
++        // Leaf end - Skip item merge checks for full stacks
+         if (Objects.equals(this.target, itemEntity.target) && areMergable(item, item1)) {
+             if (org.dreeam.leaf.config.modules.gameplay.UseSpigotItemMergingMech.enabled || item1.getCount() < item.getCount()) { // Spigot // Leaf - KeYi - Configurable spigot item merging mechanism
+                 merge(this, item, itemEntity, item1);
