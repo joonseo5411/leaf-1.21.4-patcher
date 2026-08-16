@@ -1,3 +1,13 @@
+> [!NOTE]
+> ## 이 저장소(leaf-1.21.4-patcher)에 대해
+> 이 저장소는 [Winds-Studio/Leaf](https://github.com/Winds-Studio/Leaf)의 `ver/1.21.4` 브랜치(2026-02-08 이후 공식 업데이트 중단)를 베이스로, 이후 버전(`ver/1.21.11`, `ver/26.2`)에서 검증된 **순수 성능 최적화 패치만 선별 백포트**하는 개인 프로젝트입니다.
+>
+> - 넉백/전투 관련 내용은 다루지 않습니다 (별도 문서에서 처리, 해당 패치들은 이미 세 버전 모두 동일하게 존재함을 확인함).
+> - 백포트 대상/진행 현황은 [`BACKPORT_PROGRESS.md`](BACKPORT_PROGRESS.md) 참고.
+> - 원본 Leaf 프로젝트의 라이선스(MIT, 개별 패치는 GPL-3.0-only 등)를 그대로 승계합니다. 각 패치 파일의 원저작자 표기는 유지됩니다.
+>
+> 아래는 원본 Leaf README입니다.
+
 <img src="public/image/leaf_banner.png" alt="Leaf">
 <div align="center">
  

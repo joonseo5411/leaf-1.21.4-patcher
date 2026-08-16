@@ -30,3 +30,7 @@ gale-api
 gale-server
 paper-api
 paper-server
+
+# Local session/tooling artifacts (not part of the patcher project)
+.claude/
+DEPLOY_KEY.md

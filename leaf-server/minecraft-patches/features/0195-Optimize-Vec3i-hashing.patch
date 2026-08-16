@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 12:05:58 +0900
+Subject: [PATCH] Optimize Vec3i hashing
+
+The vanilla Vec3i hash formula can produce severe collisions for some
+structured BlockPos distributions, especially dense chunk coordinate
+sets. Replace it with a mixed coordinate hash that avoids those common linear
+collision patterns.
+
+Backported from Leaf ver/26.2 (original author: HaHaWTH) to ver/1.21.4.
+
+diff --git a/net/minecraft/core/Vec3i.java b/net/minecraft/core/Vec3i.java
+index 9014b8e198be1a63ec888c0c5ab218f339c26232..6ce690e26006d4aadb36c063122ff717f79f0eb7 100644
+--- a/net/minecraft/core/Vec3i.java
++++ b/net/minecraft/core/Vec3i.java
+@@ -41,7 +41,7 @@ public class Vec3i implements Comparable<Vec3i> {
+ 
+     @Override
+     public final int hashCode() { // Paper - Perf: Final for inline
+-        return (this.getY() + this.getZ() * 31) * 31 + this.getX();
++        return org.dreeam.leaf.util.Vec3iHasher.hash(this.x, this.y, this.z); // Leaf - Optimize Vec3i hashing
+     }
+ 
+     @Override
