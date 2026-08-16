@@ -13,9 +13,9 @@
 - [x] Cache-block-state-tags.patch
 - [x] Cache-identifier-toString-and-hash.patch
 - [x] Cache-world-border.patch — *포팅 불필요: 1.21.4 vanilla/Paper already caches it as a direct field (Level.java), so this patch does not apply*
-- [ ] Cache-world-generator-sea-level.patch
+- [x] Cache-world-generator-sea-level.patch
 - [x] Check-frozen-ticks-before-landing-block.patch — *포팅 불필요: 검증 결과 이미 Gale 기반에 포함(추정, 관련 로직 확인)*
-- [ ] Check-targeting-range-before-getting-visibility.patch
+- [x] Check-targeting-range-before-getting-visibility.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (TargetingConditions.java에 followRangeRaw 조기 return 이미 존재)*
 - [x] Don-t-load-POI-for-competitor-scan.patch
 - [ ] Don-t-load-chunks-to-spawn-phantoms.patch
 - [x] Faster-floating-point-positive-modulo.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Mth.java positiveModuloForPositiveIntegerDenominator 등 이미 존재)*
@@ -52,48 +52,48 @@
 - [x] Prevent-entities-random-strolling-into-non-ticking-c.patch — *포팅 불필요: 이미 Gale/MultiPaper 기반에 포함되어 있음*
 - [x] Reduce-AbstractContainerMenu-allocations.patch
 - [x] Reduce-RandomSource-instances.patch — *포팅 불필요: 이미 Gale/Patina 기반에 동일 최적화가 포함되어 있음 (Raid.java 등에 이미 존재)*
-- [ ] Reduce-array-allocations.patch
+- [ ] Reduce-array-allocations.patch — *보류: 31개 파일에 걸친 대규모 변경 + 신규 유틸리티 클래스(me.titaniumtown.ArrayConstants) 필요, 전용 세션에서 처리 권장*
 - [x] Reduce-block-destruction-packet-allocations.patch — *포팅 불필요: 이미 Gale/SportPaper 기반에 포함되어 있음*
 - [x] Reduce-debug-subscribers-overhead.patch — *포팅 불필요: 1.21.4엔 debug subscribers 기능 자체가 없음 (ServerDebugSubscribers.java 클래스 부재, 더 최신 MC 버전 기능)*
 - [x] Reduce-enderman-teleport-chunk-lookups.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음 (EnderMan.teleport 이미 single chunk lookup 적용됨)*
-- [ ] Reduce-in-wall-checks.patch
+- [x] Reduce-in-wall-checks.patch — *포팅 불필요: 이미 Gale/Pufferfish 기반에 포함되어 있음 (LivingEntity.java에 checkStuckInWallInterval 로직 이미 존재)*
 - [x] Reduce-lambda-and-Optional-allocation-in-EntityBased.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음*
 - [x] Reduce-line-of-sight-updates-and-cache-lookups.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음 (Sensing.java expiring 배열 구조 이미 존재)*
-- [ ] Reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch
+- [x] Reduce-optimiseRandomTick-new-BlockPos-instance-crea.patch — *4개 파일의 `.immutable()` 안전 훅만 포팅(RedstoneWireTurbo/SculkSpreader/TurtleEggBlock/ExperimentalRedstoneWireEvaluator). ServerLevel#optimiseRandomTick의 POS_CACHE 공유 가변 필드 최적화는 신규 config 모듈(org.dreeam.leaf.config.modules.opt.MutableBlockPos) 필요 + 상태 공유 리스크로 스킵*
 - [x] Reduce-projectile-chunk-loading.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
 - [x] Reduce-skull-ItemStack-lookups-for-reduced-visibilit.patch — *포팅 불필요: 이미 Gale/Petal 기반에 포함되어 있음*
 - [x] Reduce-villager-item-re-pickup.patch — *포팅 불필요: 이미 Gale/EMC 기반에 포함되어 있음*
-- [ ] Remove-iterators-from-Inventory.patch
+- [x] Remove-iterators-from-Inventory.patch — *포팅 불가: 원본은 `this.equipment`(EnumMap 기반) + `EQUIPMENT_SLOT_MAPPING`/`EQUIPMENT_SLOTS_SORTED_BY_INDEX` 구조를 전제로 하는데 1.21.4 Inventory.java는 이 구조 자체가 없음(별도 armor/offhand NonNullList 구조), 상위 버전의 인벤토리 아키텍처 리팩터링에 의존적이라 포팅 불가*
 - [x] Remove-lambda-from-ticking-guard.patch — *포팅 불필요: 이미 Gale/Airplane 기반에 포함되어 있음*
-- [ ] Remove-stream-in-CraftWorld-spawnParticle.patch
+- [ ] Remove-stream-in-CraftWorld-spawnParticle.patch — *보류: ServerLevel.java에 새 헬퍼 메서드(sendParticlesSourceBukkit) 추가는 확인했지만, 실제 호출부는 CraftWorld.java(leaf-server/paper-patches 레이어, 이번 세션에 미착수)에 있어 그쪽 없이는 죽은 코드가 됨*
 - [x] Remove-stream-in-MobSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음 (변수명만 다름)*
 - [x] Remove-stream-in-TemptingSensor.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Remove-stream-on-PlayerDetector.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Remove-stream-on-updateConnectedPlayersWithinRange.patch — *포팅 불필요: 이미 Leaf 기반에 포함되어 있음*
 - [x] Replace-EntitySelectorOptions-map-with-optimized-col.patch
 - [ ] Replace-brain-with-optimized-collection.patch
-- [ ] Replace-division-by-multiplication-in-CubePointRange.patch
+- [x] Replace-division-by-multiplication-in-CubePointRange.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (CubePointRange.java에 scale 필드 이미 존재)*
 - [ ] Replace-entity-equipment-items-to-array.patch
-- [ ] Replace-parts-by-size-in-CubePointRange.patch
+- [x] Replace-parts-by-size-in-CubePointRange.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (CubePointRange.java에 size 필드 이미 존재)*
 - [ ] Replace-throttle-tracker-map-with-optimized-collecti.patch
 - [ ] Rewrite-entity-despawn-time.patch
 - [ ] SIMD-support.patch
 - [x] Send-multiple-keep-alive-packets.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음*
 - [x] Skip-BlockPhysicsEvent-if-no-listeners.patch — *포팅 완료(1.21.4는 원본과 달리 cworld != null 체크가 추가로 있어 두 조건을 함께 사용)*
-- [ ] Skip-PlayerCommandSendEvent-if-there-are-no-listener.patch
+- [x] Skip-PlayerCommandSendEvent-if-there-are-no-listener.patch — *포팅 불필요: 이미 Gale/Purpur 기반에 포함되어 있음 (Commands.java runSync에 이미 존재)*
 - [x] Skip-PreCreatureSpawnEvent-if-no-listeners.patch — *포팅 완료(원본은 2개 메서드를 건드리지만 1.21.4엔 그 중 1개 메서드 형태만 존재해서 그 부분만 적용)*
 - [x] Skip-VehicleEntityCollisionEvent-if-no-listeners.patch
 - [x] Skip-cloning-advancement-criteria.patch — *포팅 불필요: 이미 Gale/Mirai 기반에 포함되어 있음 (Advancement 레코드 압축 생성자에 이미 적용됨)*
 - [x] Skip-entity-move-if-movement-is-zero.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (Entity.java에 boundingBoxChanged 필드 이미 존재)*
 - [ ] Skip-inactive-entity-for-execute.patch
 - [x] Skip-item-merge-checks-for-full-stacks.patch
-- [ ] Skip-negligible-planar-movement-multiplication.patch
+- [x] Skip-negligible-planar-movement-multiplication.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (Entity.java에 oldDeltaMovement 가드 이미 존재)*
 - [x] Skip-secondary-POI-sensor-if-absent.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (SecondaryPoiSensor.java에 이미 적용됨)*
 - [ ] Spread-out-sending-all-player-info.patch
 - [x] Store-mob-counts-in-an-array.patch — *포팅 불필요: 이미 Gale/VMP 기반에 포함되어 있음 (LocalMobCapCalculator.java에 int[] counts 이미 존재)*
-- [ ] Update-boss-bar-within-tick.patch
+- [x] Update-boss-bar-within-tick.patch — *포팅 불필요: 이미 Gale/Lithium 기반에 포함되어 있음 (Raid.java에 isBarDirty 필드 이미 존재)*
 - [ ] Use-linked-map-for-entity-trackers.patch
-- [ ] Variable-entity-wake-up-duration.patch
+- [x] Variable-entity-wake-up-duration.patch — *포팅 불필요: 이미 Gale 기반에 포함되어 있음 (ActivationRange.java에 entityWakeUpDurationRatioStandardDeviation 로직 이미 존재)*
 - [ ] Virtual-thread-support-for-chat-executor.patch
 - [ ] Virtual-thread-support-for-download-pool.patch
 - [ ] async-chunk-sender.patch
@@ -151,7 +151,9 @@
 - [x] Replace-data-maps-with-optimized-collection.patch
 - [ ] SIMD-support.patch
 
-**진행률: 62 / 138 체크됨** (실제 포팅 22개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+**진행률: 73 / 138 체크됨** (실제 포팅 24개, 나머지는 이미 각종 서드파티 포크 기반에 구현되어 있거나 1.21.4엔 없는 기능이라 불필요로 확인됨.
+
+**Batch 10**: `reduce-optimiseRandomTick-new-BlockPos-instance-crea`(4개 파일의 `.immutable()` 안전 훅만 포팅 — ServerLevel의 공유 POS_CACHE 최적화는 신규 config 모듈 필요로 스킵), `cache-world-generator-sea-level`(NoiseBasedChunkGenerator#getSeaLevel 캐싱)을 포팅. 나머지 후보 11개 중 9개는 이미 Gale 기반에 구현되어 있었고(Check-targeting-range, Reduce-in-wall-checks, Variable-entity-wake-up-duration, Update-boss-bar-within-tick, Skip-PlayerCommandSendEvent, Skip-negligible-planar-movement, Replace-division/parts-by-size-in-CubePointRange), Remove-iterators-from-Inventory는 1.21.4 인벤토리 구조 자체가 달라 포팅 불가로 확인, Reduce-array-allocations(31개 파일)와 Remove-stream-in-CraftWorld-spawnParticle(paper-patches 레이어 필요)은 대규모/미탐색 인프라 필요로 보류. 프레시 월드 3개 차원 부팅 스모크 테스트로 검증.
 
 **Batch 9**: `optimize-SimpleBitStorage-object-layout`(불필요한 캐시된 long 필드 2개 제거, `cellIndex()`를 `Integer.toUnsignedLong()` 인라인 연산으로 재계산), `optimize-get-chunk`(`Level#getBlockState(BlockPos)`가 x/y/z를 로컬 변수로 뽑아 `chunk.getBlockState(x, y, z)` 오버로드 직접 호출, `BlockPos` 객체 재참조 감소 — 원본 패치의 SpreadingSnowyBlock.java 훅은 1.21.4에 해당 클래스/메서드 부재로 스킵)를 포팅. 프레시 월드로 3개 차원(overworld/nether/end) 전부 부팅 스모크 테스트, 예외 0건 확인.
 

@@ -1,0 +1,68 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: BukkitPatcher <bukkitpatcher@local.dev>
+Date: Sun, 16 Aug 2026 17:47:53 +0900
+Subject: [PATCH] reduce optimiseRandomTick new BlockPos instance create
+ (immutable() safety hunks only)
+
+
+diff --git a/io/papermc/paper/redstone/RedstoneWireTurbo.java b/io/papermc/paper/redstone/RedstoneWireTurbo.java
+index b288d57d9f7bd0ccf1877cf9920bd67288ff22f7..232b5ca4224ff46b3750780d6351d974dbff8356 100644
+--- a/io/papermc/paper/redstone/RedstoneWireTurbo.java
++++ b/io/papermc/paper/redstone/RedstoneWireTurbo.java
+@@ -717,7 +717,7 @@ public final class RedstoneWireTurbo {
+             upd.parent = pos;
+             upd.visited = true;
+             identifyNode(worldIn, upd);
+-            nodeCache.put(pos, upd);
++            nodeCache.put(pos.immutable(), upd); // Leaf - Reduce optimiseRandomTick new BlockPos instance create - immutable
+         }
+         upd.currentState = newState;
+ 
+@@ -795,7 +795,7 @@ public final class RedstoneWireTurbo {
+         upd.currentState = newState;
+         upd.type = UpdateNode.Type.REDSTONE;
+         upd.visited = true;
+-        nodeCache.put(pos, upd);
++        nodeCache.put(pos.immutable(), upd); // Leaf - Reduce optimiseRandomTick new BlockPos instance create - immutable
+         propagateChanges(worldIn, upd, 0);
+ 
+         // Perform the walk over all directly reachable redstone wire blocks, propagating wire value
+diff --git a/net/minecraft/world/level/block/SculkSpreader.java b/net/minecraft/world/level/block/SculkSpreader.java
+index 54971f1d77a7850988bf5525ad4b383a3f0f2c14..0d5f2e2607ac870255b52ce8f0902055b3890fdb 100644
+--- a/net/minecraft/world/level/block/SculkSpreader.java
++++ b/net/minecraft/world/level/block/SculkSpreader.java
+@@ -165,7 +165,7 @@ public class SculkSpreader {
+                     if (chargeCursor.charge <= 0) {
+                         level.levelEvent(3006, chargeCursor.getPos(), 0);
+                     } else {
+-                        BlockPos pos1 = chargeCursor.getPos();
++                        BlockPos pos1 = chargeCursor.getPos().immutable(); // Leaf - Reduce optimiseRandomTick new BlockPos instance create - immutable
+                         map1.computeInt(pos1, (cursorPos, charge) -> (charge == null ? 0 : charge) + chargeCursor.charge);
+                         SculkSpreader.ChargeCursor chargeCursor1 = map.get(pos1);
+                         if (chargeCursor1 == null) {
+diff --git a/net/minecraft/world/level/block/TurtleEggBlock.java b/net/minecraft/world/level/block/TurtleEggBlock.java
+index a3a093d95306baac22e5cf720f5b14f733b548d4..479f7936954d0416586350f3b4b378931f169ba7 100644
+--- a/net/minecraft/world/level/block/TurtleEggBlock.java
++++ b/net/minecraft/world/level/block/TurtleEggBlock.java
+@@ -131,7 +131,7 @@ public class TurtleEggBlock extends Block {
+                     Turtle turtle = EntityType.TURTLE.create(level, EntitySpawnReason.BREEDING);
+                     if (turtle != null) {
+                         turtle.setAge(-24000);
+-                        turtle.setHomePos(pos);
++                        turtle.setHomePos(pos.immutable()); // Leaf - Reduce optimiseRandomTick new BlockPos instance create - immutable
+                         turtle.moveTo(pos.getX() + 0.3 + i * 0.2, pos.getY(), pos.getZ() + 0.3, 0.0F, 0.0F);
+                         level.addFreshEntity(turtle, org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.EGG); // CraftBukkit
+                     }
+diff --git a/net/minecraft/world/level/redstone/ExperimentalRedstoneWireEvaluator.java b/net/minecraft/world/level/redstone/ExperimentalRedstoneWireEvaluator.java
+index 1fc3aaa3732ddbae5bb24f1985fc9fb5ffd5e554..b0223458cdf127c73af285adb52ab493ddc14a61 100644
+--- a/net/minecraft/world/level/redstone/ExperimentalRedstoneWireEvaluator.java
++++ b/net/minecraft/world/level/redstone/ExperimentalRedstoneWireEvaluator.java
+@@ -103,7 +103,7 @@ public class ExperimentalRedstoneWireEvaluator extends RedstoneWireEvaluator {
+         BlockState blockState = level.getBlockState(pos);
+         if (blockState.is(this.wireBlock)) {
+             this.setPower(pos, blockState.getValue(RedStoneWireBlock.POWER), orientation);
+-            this.wiresToTurnOff.add(pos);
++            this.wiresToTurnOff.add(pos.immutable()); // Leaf - Reduce optimiseRandomTick new BlockPos instance create - immutable
+         } else {
+             this.propagateChangeToNeighbors(level, pos, 0, orientation, true);
+         }
